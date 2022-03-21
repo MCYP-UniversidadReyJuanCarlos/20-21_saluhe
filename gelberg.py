@@ -1,11 +1,14 @@
 from asyncio.windows_events import NULL
 from math import log2
+import math
 import string
 from typing import Counter
+from xmlrpc.client import boolean
 from pyasn1.type import univ
 
 from asn1 import AsnPubKey
 from hashSha256 import generate_hash
+from millerRabin_primetest import millerRabin
 
 from models import publicKeyRSA
 
@@ -134,3 +137,50 @@ class gelberg_et_al:
         for i in range(1, len(X)+1):
             result+= int(X[len(X)-i]) * (256 ^ (len(X)-i))
         return result
+
+    def verify(self,salt, alpha, k, e, len, info:gelberg_output) -> bool:
+        if info != NULL and info.firstTuple != NULL and info.firstTuple.N >= 2 ^ (len-1):
+
+            if millerRabin(e):
+                #Set m1, m2
+                m1= int(abs( k/ (log2(alpha)) ))
+                m2= int(abs( k / ( log2( (1/alpha) + (1/e) * (1 - (1 / alpha)) ) ) ))
+
+                if info.secondTuple!= NULL and info.secondTuple.count == m2:
+                    #Primes vector that included all primes numbers <= alpha-1
+                    primes_vector = get_primes_vector()
+
+                    if math.gcd(primorial(primes_vector),info.firstTuple.N) == 1 :
+                        weird_key = publicKeyRSA(info.firstTuple.N, e * info.firstTuple.N)
+                        for i in range(0,m2):
+                            pi=self.getRho(info.firstTuple, salt, i+1,len,m2)
+                            
+                            if i<=m1 and pi!=self.RSAVP1(weird_key, info.secondTuple[i]):
+                                #ρi = RSAVP1((N, eN), σi)
+                                return False                             
+                            elif pi!=self.RSAVP1(info.firstTuple, info.secondTuple[i]):
+                                #ρi = RSAVP1(PK , σi)
+                                return False
+                        return True                               
+
+        return False
+        
+    # Input
+    #   (n, e) RSA public key
+    #   s signature representative, an integer between 0 and n - 1  
+    # Output:
+    #   m message representative, an integer between 0 and n - 1
+    def RSAVP1(key:publicKeyRSA, s:int)-> int:
+        if s<0 or s > key.N-1:
+            raise ValueError("signature representative out of range")
+        return (s^key.e) % key.N
+
+#Input
+#   vector: int collection
+#Output
+#   product of elements inside input collection
+def primorial(vector:any)-> int:
+    result=1
+    for a in vector:
+        result*=a
+    return result
