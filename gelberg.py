@@ -5,6 +5,9 @@ import string
 from pyasn1.type import univ
 from hashSha256 import generate_hash
 from millerRabin_primetest import millerRabin
+from rsa import asn1
+from rsa.asn1 import AsnPubKey
+from pyasn1.codec.der import encoder
 
 from models import publicKeyRSA
 from sieve_of_eratosthenes import sieve_of_eratosthenes
@@ -53,6 +56,8 @@ class gelberg_et_al:
         #Step 3: get rsa key
         d_np= ((self.e*N)^-1) % (p-1)
         d_nq= ((self.e*N)^-1) % (q-1)
+        #qInv = (inverse of q) mod p
+        q_inv= q^(-1) % p
 
         k = gelberg_key(p,q, d_np, d_nq, q_inv)
         k_prima =gelberg_key(p,q, d_np, d_nq, q_inv)
@@ -84,11 +89,18 @@ class gelberg_et_al:
         #Octet long of m2
         m2_long= abs((1/8) * (log2(m2+1)))
 
+        #PK ASN.1 octet string encoding of the RSA public key (N, e)
+        asnPK= AsnPubKey()
+        asnPK.setComponentByName('modulus',keyPublic.N) 
+        asnPK.setComponentByName('publicExponent',keyPublic.e)
+        PK = univ.OctetString(encoder.encode(asnPK))
+        #EI= I2OSP(i, |m2|) be the |m2|-octet long string encoding of the integer i
+        EI = self.I2OSP(i, m2_long)
+
         j=1
         while(True):
-            EI = self.I2OSP(i, m2_long)
             EJ = self.I2OSP(j, abs((1/8) * (log2(j+1))))
-            s = pk.append(salt.append(EI.append(EJ)))
+            s = PK.append(salt.append(EI.append(EJ)))
             ER = self.MGF1_SHA256(s,len)
             p_i = self.OS2IP(ER)
             if p_i>= keyPublic.N : 
