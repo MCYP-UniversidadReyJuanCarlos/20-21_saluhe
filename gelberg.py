@@ -32,11 +32,11 @@ class gelberg_key:
 
 class gelberg_et_al:
 
-    salt:string #Octet string
-    alpha:int   #prime number
-    k:int       #security parameter, 128
-    e:int       #fixed prime RSA exponent
-    len:int     #RSA key length
+    salt:univ.OctetString   #Octet string
+    alpha:int               #prime number
+    k:int                   #security parameter, 128
+    e:int                   #fixed prime RSA exponent
+    len:int                 #RSA key length
 
     def __init__(self, salt, alpha, k, e, len):
         self.salt=salt
