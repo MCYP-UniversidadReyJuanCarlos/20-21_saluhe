@@ -2,15 +2,12 @@ from asyncio.windows_events import NULL
 from math import log2
 import math
 import string
-from typing import Counter
-from xmlrpc.client import boolean
 from pyasn1.type import univ
-
-from asn1 import AsnPubKey
 from hashSha256 import generate_hash
 from millerRabin_primetest import millerRabin
 
 from models import publicKeyRSA
+from sieve_of_eratosthenes import sieve_of_eratosthenes
 
 class gelberg_output:
     firstTuple:publicKeyRSA
@@ -98,9 +95,6 @@ class gelberg_et_al:
                 return p_i
             j+=1       
 
-    def verify() :
-        return
-
     # non negative integer to octet string
     def I2OSP(x:int, xLen:int):
         result=univ.OctetString('')
@@ -148,7 +142,7 @@ class gelberg_et_al:
 
                 if info.secondTuple!= NULL and info.secondTuple.count == m2:
                     #Primes vector that included all primes numbers <= alpha-1
-                    primes_vector = get_primes_vector()
+                    primes_vector = sieve_of_eratosthenes(alpha-1)
 
                     if math.gcd(primorial(primes_vector),info.firstTuple.N) == 1 :
                         weird_key = publicKeyRSA(info.firstTuple.N, e * info.firstTuple.N)
@@ -174,6 +168,7 @@ class gelberg_et_al:
         if s<0 or s > key.N-1:
             raise ValueError("signature representative out of range")
         return (s^key.e) % key.N
+
 
 #Input
 #   vector: int collection
