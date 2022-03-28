@@ -5,7 +5,6 @@ import string
 from pyasn1.type import univ
 from hashSha256 import generate_hash
 from millerRabin_primetest import millerRabin
-from rsa import asn1
 from rsa.asn1 import AsnPubKey
 from pyasn1.codec.der import encoder
 

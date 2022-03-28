@@ -1,9 +1,8 @@
 # key  clave
 # b block long 
 from operator import xor
-import string
-
 from hashSha256 import generate_hash
+
 class hmac():
     ipad=bytearray()
     opad=bytearray()
