@@ -1,4 +1,5 @@
 #Public key generator with verifiable randomnes
+import copy
 import os
 from gelberg import gelberg_et_al
 from models import pkgvr_output, privateKeyRSA, publicKeyRSA
@@ -14,13 +15,21 @@ from rsa.asn1 import AsnPubKey
 e = 65537   #fixed rsa exponent
 r_w=0       #the RSA key length
 
-def pkgvr(message: bytearray) -> pkgvr_output:
-    r_u = mkNonce()   
+def pkgvr() -> pkgvr_output:
+    r_u = bytearray(mkNonce(),'ascii')  
 
+    r_u_aux= copy.copy(r_u)
     # r'u=hash(0||ru)
-    r_prima_u = generate_hash(r_u.insert(0, int.to_bytes(0, 2, 'big')))
-    p_u = generate_hash(r_u.insert(0, int.to_bytes(1, 2, 'big')))
-    s_prima = generate_hash(r_u.insert(0, int.to_bytes(2, 2, 'big')))
+    r_u[0:0] = int.to_bytes(0, 2, 'big')
+    r_prima_u = generate_hash(r_u)
+
+    r_u= copy.copy(r_u_aux)
+    r_u_aux[0:0] = int.to_bytes(1, 2, 'big')
+    p_u = generate_hash(r_u_aux)
+
+    r_u_aux= copy.copy(r_u)
+    r_u[0:0] =int.to_bytes(2, 2, 'big')
+    s_prima = generate_hash(r_u)
 
     #pedersen_commitment(r_prima_u,p_u)
     pedersen = pedersen_commitment(r_prima_u,p_u)
@@ -29,7 +38,7 @@ def pkgvr(message: bytearray) -> pkgvr_output:
 
 
     #rca received
-    r_ca = mkNonce()
+    r_ca = bytearray(mkNonce(),'ascii')  
     s = xor(r_prima_u, generate_hash(r_ca))
 
     #Algorithm 2
@@ -54,5 +63,10 @@ def pkgvr(message: bytearray) -> pkgvr_output:
         asnPK.setComponentByName('publicExponent', e)
         return pkgvr_output(publicKeyRSA(N,e), privateKeyRSA(p,q,e))
     raise ValueError("Gelberg Proof: Not valid")
+
+
+
+
+x= pkgvr()
 
     

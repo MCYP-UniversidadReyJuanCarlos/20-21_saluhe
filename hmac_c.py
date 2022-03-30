@@ -3,11 +3,11 @@
 from operator import xor
 from hashSha256 import generate_hash
 
-class hmac():
+class hmac_class:
     ipad=bytearray()
     opad=bytearray()
 
-    def hmac(self,b:int, key:bytearray, text:bytearray) -> bytearray:
+    def hmac_method(self,b:int, key:bytearray, text:bytearray) -> bytearray:
         k0=key
         self.define_defaultValues(b)
 
