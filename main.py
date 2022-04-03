@@ -32,8 +32,8 @@ def pkgvr() -> pkgvr_output:
     s_prima = generate_hash(r_u)
 
     #pedersen_commitment(r_prima_u,p_u)
-    pedersen = pedersen_commitment(r_prima_u,p_u)
-    c = pedersen.commitment()
+    pedersen = pedersen_commitment()
+    c = pedersen.commitment(r_prima_u,p_u)
     #----------------------------> send commitment to CA
 
 
