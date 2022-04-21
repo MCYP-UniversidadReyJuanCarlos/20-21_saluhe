@@ -9,7 +9,12 @@ Tecnologías empleadas:<br>
 <br>
 <h2> Esquema del protocolo</h2>
 
-<table style="border: none!important;">
+<table>
+  <tr>
+    <th>USER'S ACTIONS</th>
+    <th></th>
+    <th>CA'S ACTIONS</th>
+  </tr>
   <tr>
     <td><img src="https://latex.codecogs.com/svg.image?\textit{U(pp,e;}r_{u})\\"/></td>
     <td></td>
