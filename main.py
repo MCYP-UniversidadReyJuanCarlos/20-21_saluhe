@@ -13,7 +13,11 @@ from rsa.asn1 import AsnPubKey
 
 
 e = 65537   #fixed rsa exponent
-r_w=0       #the RSA key length
+r_w = 1536    #the RSA key length (bit-primes)
+
+# To generate RSA moduli which are products of two (b(λ)-bit) 1536-bit primes, the instantiation
+# with the Dodis–Yampolskiy PRF uses l = 21535 + 554415 which is a Sophie Germain
+# prime, Λ = (4l + 18)l + 1 and r = 1572 · Λ + 1.
 
 def pkgvr() -> pkgvr_output:
     r_u = bytearray(mkNonce(),'ascii')  
@@ -32,23 +36,27 @@ def pkgvr() -> pkgvr_output:
     s_prima = generate_hash(r_u)
 
     #pedersen_commitment(r_prima_u,p_u)
+    r_prima_u_asInteger=int.from_bytes(r_prima_u,'big')
+    p_u_asInteger=int.from_bytes(p_u,'big')
     pedersen = pedersen_commitment()
-    c = pedersen.commitment(r_prima_u,p_u)
+    c = pedersen.commitment(r_prima_u_asInteger,p_u_asInteger)
     #----------------------------> send commitment to CA
 
 
     #rca received
     r_ca = bytearray(mkNonce(),'ascii')  
-    s = xor(r_prima_u, generate_hash(r_ca))
+    s = xor(r_prima_u_asInteger, int.from_bytes(generate_hash(r_ca),'big'))
 
     #Algorithm 2
-    alg2_collection:algorithm_2_output=algorithm_2(2, s, e, r_w)
+    hmac=hmac_class()
+    alg2_collection:algorithm_2_output=algorithm_2(4, s, e, r_w, s_prima, hmac)
     if alg2_collection.i == -1 :
         raise ValueError("Algorithm 2: Impossible to get a valid collection of primes")
 
     #Set p, q and N
     p = alg2_collection.a_collection.pop(alg2_collection.i)
-    q = alg2_collection.a_collection.pop(alg2_collection.a_collection.count)
+    j = alg2_collection.a_collection.count
+    q = alg2_collection.a_collection.pop(j)
     N = p*q
 
     #Gelberg     

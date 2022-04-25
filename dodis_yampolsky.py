@@ -18,12 +18,11 @@ class dodis_yampolsky:
         return self.g^(1 / (m + sk))
 
     #From a security parameter (k) obtain a generator g, sk, and pk
-    def gen(self, k:int):
+    def gen(self, k:int, random_string:bytes):
         # Pick p, q primes such that p | q - 1, that is equvalent to
         # say that q = r*p + 1 for some r
-
         #p is prime of length k
-        p = number.getPrime(k, Random.new().read)
+        p = number.getPrime(k,random_string)
         r = 1
         while True:
             q = r*p + 1
