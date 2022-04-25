@@ -22,16 +22,14 @@ class hmac_class:
         elif len(key) < b:    
             k0 = bytearray(k0)      
             k0.extend(int.to_bytes(0, b - len(key), 'big'))
-            
-        #print('k0 generated '+k0.hex())
 
-        k0_asInteger=int.from_bytes(k0,'big')
         #Step 4
-        k0_4 = bytearray(xor(k0_asInteger, int.from_bytes(self.ipad,'big')))
+        k0_4 = bytearray(byte_xor(k0, self.ipad))
         #Step 5/Step 6
-        k0_6=generate_hash(k0_4.extend(text))   
+        k0_4.extend(text)
+        k0_6=generate_hash(k0_4)
         #Step 7
-        k0_7 = bytearray(xor(k0_asInteger, int.from_bytes(self.opad,'big')))
+        k0_7 = bytearray(byte_xor(k0, self.opad))
         print('k0_7 ' + k0_7.hex())
         
         k0_7.extend(k0_6)
@@ -43,4 +41,8 @@ class hmac_class:
         self.ipad= bytearray(b'\x36'*b)
         self.opad= bytearray(b'\x5C'*b)
         #print(self.opad.hex())
+
+
+def byte_xor(ba1, ba2):
+    return bytes(a ^ b for (a, b) in zip(ba1, ba2))
 
