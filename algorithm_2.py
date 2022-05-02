@@ -29,13 +29,13 @@ def algorithm_2(T:int,s:int, e:any, b:int, s_prima:bytearray, hmac:hmac_class) -
     while (ctr<2 and j<T):
         j+=1
 
-        #random string
-        random_string = hmac.hmac_method(b, s_prima, int.to_bytes(j, b,'big'))
-        prf.gen(b, random_string)
-
-        aj = prf.sign_sk_provided(s,j)
+        #random string       
+        prf.gen(b)
+        aj = prf.sign_sk_provided(s,j)        
         result.a_collection.insert(aj)
 
+        random_string = hmac.hmac_method(b, s_prima, int.to_bytes(j, b,'big')) #HMAC (1^rw, s',..)
+        #B-bit long. gcd(e,(p-1))=1
         if millerRabin(b, e, aj):
             if(ctr==0):
                 result.i=j

@@ -72,9 +72,6 @@ def pkgvr() -> pkgvr_output:
         return pkgvr_output(publicKeyRSA(N,e), privateKeyRSA(p,q,e))
     raise ValueError("Gelberg Proof: Not valid")
 
-
-
-
 x= pkgvr()
 
     

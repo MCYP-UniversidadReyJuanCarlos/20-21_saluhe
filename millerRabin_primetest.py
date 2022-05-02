@@ -1,4 +1,5 @@
 from math import log2
+import math
 from random import randint
 def millerRabin(n:int) -> bool :
     #Step 1
@@ -40,3 +41,8 @@ def millerRabin(n:int) -> bool :
     if(x==-1):
         return True
     return False
+
+def millerRabin(b:int, e:int, p:int)->bool:
+    if((p).bit_length != b):
+        return False
+    return (millerRabin(p)) and  math.gcd( e, p-1 ) == 1

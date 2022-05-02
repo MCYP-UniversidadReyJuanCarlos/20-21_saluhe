@@ -53,10 +53,10 @@ class gelberg_et_al:
         N=p*q
 
         #Step 3: get rsa key
-        d_np= ((self.e*N)^-1) % (p-1)
-        d_nq= ((self.e*N)^-1) % (q-1)
+        d_np= ((self.e*N) ** -1) % (p-1)
+        d_nq= ((self.e*N) ** -1) % (q-1)
         #qInv = (inverse of q) mod p
-        q_inv= q^(-1) % p
+        q_inv= q**(-1) % p
 
         k = gelberg_key(p,q, d_np, d_nq, q_inv)
         k_prima =gelberg_key(p,q, d_np, d_nq, q_inv)
@@ -78,8 +78,8 @@ class gelberg_et_al:
     #  m = [0..n-1], output [0..n-1]
     def RSAPSP1(k:gelberg_key, m) -> any :        
         if m in range(0, ):
-            s_1 = (m^k.d_np) % k.p
-            s_2 = (m^k.d_nq) % k.q
+            s_1 = (m ** k.d_np) % k.p
+            s_2 = (m**k.d_nq) % k.q
             n = ((s_1 - s_2)*k.q_inv) % k.p
             return s_2 + k.q * n
         return -1
@@ -109,7 +109,7 @@ class gelberg_et_al:
     # non negative integer to octet string
     def I2OSP(x:int, xLen:int):
         result=univ.OctetString('')
-        if x < 256^xLen:
+        if x < 256**xLen:
             i=1
             int_str= str(x)
             for i in range(1, xLen+1):
@@ -117,7 +117,7 @@ class gelberg_et_al:
                 if xLen-i > len(int_str):
                     result+= 0
                 else: 
-                    result+= int(int_str[xLen]) * (256 ^ (xLen-i))
+                    result+= int(int_str[xLen]) * (256 ** (xLen-i))
             return result
 
         raise ValueError("integer too large")
@@ -127,7 +127,7 @@ class gelberg_et_al:
     # *hash length fixed in 256 (SHA-256)
     def MGF1_SHA256(self,mgfSeed:univ.OctetString, maskLen:int):
         hlen=256
-        if maskLen > (2^32) * hlen :
+        if maskLen > (2**32) * hlen :
             raise ValueError("mask too long")
         T= univ.OctetString('')
         for counter in range(0,maskLen//hlen):
@@ -140,11 +140,11 @@ class gelberg_et_al:
     def OS2IP(X:univ.OctetString) -> int:
         result=0       
         for i in range(1, len(X)+1):
-            result+= int(X[len(X)-i]) * (256 ^ (len(X)-i))
+            result+= int(X[len(X)-i]) * (256 ** (len(X)-i))
         return result
 
     def verify(self,salt, alpha, k, e, len, info:gelberg_output) -> bool:
-        if info != NULL and info.firstTuple != NULL and info.firstTuple.N >= 2 ^ (len-1):
+        if info != NULL and info.firstTuple != NULL and info.firstTuple.N >= 2 ** (len-1):
 
             if millerRabin(e):
                 #Set m1, m2
@@ -178,7 +178,7 @@ class gelberg_et_al:
     def RSAVP1(key:publicKeyRSA, s:int)-> int:
         if s<0 or s > key.N-1:
             raise ValueError("signature representative out of range")
-        return (s^key.e) % key.N
+        return (s**key.e) % key.N
 
 
 #Input
