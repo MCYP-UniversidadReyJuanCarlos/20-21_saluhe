@@ -42,7 +42,7 @@ class gelberg_et_al:
         self.alpha=alpha
         self.k=k
         self.e=e
-        self.len=len
+        self.len=len    
 
     def gelberg(self, p:int, q:int) -> gelberg_output:
         #Step 1
