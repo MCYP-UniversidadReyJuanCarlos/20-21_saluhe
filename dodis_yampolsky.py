@@ -42,19 +42,21 @@ class dodis_yampolsky:
         G = [] 
         ctr=0
         self.t= q
-        for i in range(1, q): # Z_q*
-            aux=i**r % q
-            if (aux!=1) :
-                G.append(aux)
-                ctr+=1
-                if ctr==2:
-                    break
 
-        #G = list(set(G))
-        
-        # Since the order of G is prime, any element of G except 1 is a generator
-        #self.g = random.choice(list(filter(lambda e: e != 1, G)))        
-        #self.sk = random.choice(list(filter(lambda e: e != 1, G)))
+        #Choose two random elements inside G
+        last_i=0
+        while True:
+            i = random.randint(1, q)
+            if i != last_i:
+                aux=i**r % q
+                if aux != 1 :
+                    G.append(aux)
+                    ctr+=1
+                    last_i = i
+                    if ctr==2:
+                        break
+                
+        # Since the order of G is prime, any element of G except 1 is a generator        
         self.g = G[0]
         self.sk= G[1]
 
