@@ -122,7 +122,7 @@ def user():
     writeOutputFile('r_ca received from CA: '+r_ca.hex())
 
     s = xor(r_prima_u_asInteger, int.from_bytes(generate_hash(r_ca),'big'))
-    writeOutputFile('Seed s has been established: '+s.hex())  
+    writeOutputFile('Seed s has been established: ' + str(s))  
 
     #Algorithm 2
     hmac=hmac_class()
