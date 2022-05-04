@@ -77,7 +77,7 @@ def pkgvr() -> pkgvr_output:
 
 def writeOutputFile(s:str):
     lock_OutputFile.acquire()
-    outputFile.write(threading.current_thread().getName()+ ' ' + s + '\n')
+    outputFile.write(threading.current_thread().name+ ' ' + s + '\n')
     lock_OutputFile.release()
 
 def user():
