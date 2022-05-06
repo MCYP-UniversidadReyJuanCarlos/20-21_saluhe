@@ -77,7 +77,7 @@ class golberg_et_al:
 
     #  m = [0..n-1], output [0..n-1]
     def RSASP1(k:golberg_key, m) -> any :        
-        if m in range(0, k.):
+        if m in range(0, ):
             s_1 = pow(m, k.d_np, k.p)
             s_2 = pow(m, k.d_nq, k.q)
             n = ((s_1 - s_2)*k.q_inv) % k.p
