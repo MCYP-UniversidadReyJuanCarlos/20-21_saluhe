@@ -69,15 +69,15 @@ class golberg_et_al:
         for i in range(1,m2):
             p_i= self.getRho(kRSA, self.salt, i, self.len, m2)
             if i <= m1:
-                result.secondTuple.append(self.RSAPSP1(k_prima, p_i))
+                result.secondTuple.append(self.RSASP1(k_prima, p_i))
                 continue
-            result.secondTuple.append(self.RSAPSP1(k, p_i))
+            result.secondTuple.append(self.RSASP1(k, p_i))
 
         return result
 
     #  m = [0..n-1], output [0..n-1]
-    def RSAPSP1(k:golberg_key, m) -> any :        
-        if m in range(0, ):
+    def RSASP1(k:golberg_key, m) -> any :        
+        if m in range(0, k.):
             s_1 = pow(m, k.d_np, k.p)
             s_2 = pow(m, k.d_nq, k.q)
             n = ((s_1 - s_2)*k.q_inv) % k.p
