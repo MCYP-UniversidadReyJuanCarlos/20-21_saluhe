@@ -3,6 +3,7 @@ import copy
 import os
 import threading
 from time import gmtime, strftime
+import time
 from gelberg import gelberg_et_al
 from models import pkgvr_output, privateKeyRSA, publicKeyRSA
 from hashSha256 import *
@@ -77,7 +78,12 @@ def pkgvr() -> pkgvr_output:
 
 def writeOutputFile(s:str):
     lock_OutputFile.acquire()
+    if outputFile.closed : 
+        outputFile = open(outputFilePath,'w')
+
     outputFile.write(threading.current_thread().name+ ' ' + s + '\n')
+    outputFile.close()
+
     lock_OutputFile.release()
 
 def user():
@@ -114,6 +120,7 @@ def user():
     writeOutputFile('')
     lock_InformationPipe.notify()  
     lock_InformationPipe.release()
+    time.sleep(2)
 
     #----------------------------> waiting r_ca
     lock_InformationPipe.acquire()
@@ -153,7 +160,8 @@ def user():
     writeOutputFile('')
     lock_InformationPipe.notify()  
     lock_InformationPipe.release()
-    
+    time.sleep(2)
+
     lock_InformationPipe.acquire()
     lock_InformationPipe.wait() 
     writeOutputFile('Proof received from CA') 
@@ -182,6 +190,7 @@ def ca():
     writeOutputFile('')
     lock_InformationPipe.notify()  
     lock_InformationPipe.release()
+    time.sleep(2)
 
     #----------------------------> waiting proof, N, j
     lock_InformationPipe.acquire()
@@ -224,7 +233,10 @@ lock_OutputFile = threading.Lock()  #used to read/write in output file
 lock_InformationPipe = threading.Condition() #used to read/write in pipe structure
 
 pipe = []
-outputFile = open ('Output_'+strftime('%Y-%m-%dT%H%M%SZ', gmtime())+'.txt','w')
+
+outputFilePath='Output_'+strftime('%Y-%m-%dT%H%M%SZ', gmtime())+'.txt'
+
+outputFile = open (outputFilePath,'w')
 outputFile.write('RSA Public-Key generation with verifiable randomness')
 outputFile.write('User and CA threads have been created')
 

@@ -19,30 +19,32 @@ class pedersen_commitment:
         # Pick p, q primes such that p | q - 1, that is equvalent to
         # say that q = r*p + 1 for some r
         p = number.getPrime(security, Random.new().read)
-        print("p = ",p)
+        print("PEDERSEN. p = ",p)
         
         r = 1
         while True:
             q = r*p + 1
             if number.isPrime(q):
-                print("q = ",q)
+                print("PEDERSEN. q = ",q)
                 break
             r += 1
         
         # Compute elements of G = {i^r mod q | i in Z_q*}
         G = set() 
-        for i in range(1, q): # Z_q*
-            G.add(i**r % q)
+        for i in range(1,4):
+            aux = i**r % q # Z_q*
+            if(aux!=1):
+                G.add(aux)
 
         G = list(G)
-        print("Order of G = {i^r mod q | i in Z_q*} is " + str(len(G)) + " (must be equal to p).")
+        print("PEDERSEN. Order of G = {i^r mod q | i in Z_q*} is " + str(len(G)) + " (must be equal to p).")
         
         # Since the order of G is prime, any element of G except 1 is a generator
-        g = random.choice(list(filter(lambda e: e != 1, G)))
-        print("g = ",g)
+        g = G[0]
+        print("PEDERSEN. g = ",g)
                 
-        h = random.choice(list(filter(lambda e: e != 1 and e != g, G)))
-        print("h = ",h)
+        h = G[1]
+        print("PEDERSEN. h = ",h)
         
         # g and h are elements of G such that nobody knows math.log(h, g) (log of h base g)
             
