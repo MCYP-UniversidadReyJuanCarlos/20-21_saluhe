@@ -4,7 +4,7 @@ import os
 import threading
 from time import gmtime, strftime
 import time
-from gelberg import gelberg_et_al
+from golberg import golberg_et_al
 from models import pkgvr_output, privateKeyRSA, publicKeyRSA
 from hashSha256 import *
 from operator import xor
@@ -62,18 +62,18 @@ def pkgvr() -> pkgvr_output:
     q = alg2_collection.a_collection.pop(j)
     N = p*q
 
-    #Gelberg     
+    #golberg     
     salt = univ.OctetString(os.urandom(32)) #Nist recommend salt string of at least 32 bit
     #HMAC(s',j+2,r_w)
-    gelberg = gelberg_et_al(salt, s_prima, alg2_collection.a_collection.count + 2, e, r_w)
-    proof_w = gelberg.gelberg(p,q)
+    golberg = golberg_et_al(salt, s_prima, alg2_collection.a_collection.count + 2, e, r_w)
+    proof_w = golberg.golberg(p,q)
     #----------------------------> send proof to CA
-    if gelberg.verify(salt, generate_hash(r_ca), alg2_collection.a_collection.count + 2, e, r_w,proof_w):
+    if golberg.verify(salt, generate_hash(r_ca), alg2_collection.a_collection.count + 2, e, r_w,proof_w):
         asnPK= AsnPubKey()
         asnPK.setComponentByName('modulus',N) 
         asnPK.setComponentByName('publicExponent', e)
         return pkgvr_output(publicKeyRSA(N,e), privateKeyRSA(p,q,e))
-    raise ValueError("Gelberg Proof: Not valid")
+    raise ValueError("golberg Proof: Not valid")
 
 
 def writeOutputFile(s:str):
@@ -146,11 +146,11 @@ def user():
     N = p*q
     writeOutputFile('N has been established: ' + str(N)) 
 
-    #Gelberg     
+    #golberg     
     salt = univ.OctetString(os.urandom(32)) #Nist recommend salt string of at least 32 bit
     #HMAC(s',j+2,r_w)
-    gelberg = gelberg_et_al(salt, s_prima, alg2_collection.a_collection.count + 2, e, r_w)
-    proof_w = gelberg.gelberg(p,q)
+    golberg = golberg_et_al(salt, s_prima, alg2_collection.a_collection.count + 2, e, r_w)
+    proof_w = golberg.golberg(p,q)
     
     pipe.append(q)
     pipe.append(p)
@@ -173,7 +173,7 @@ def user():
 
     lock_InformationPipe.release()
     outputFile.close()
-    raise ValueError("Gelberg Proof: Not valid")
+    raise ValueError("golberg Proof: Not valid")
 
 def ca():
     lock_InformationPipe.acquire()
@@ -206,26 +206,26 @@ def ca():
     writeOutputFile('p from user: ' + str(q)) 
 
     salt = univ.OctetString(os.urandom(32)) #Nist recommend salt string of at least 32 bit
-    gelberg =  gelberg_et_al()
-    if gelberg.verify(salt, generate_hash(r_ca), j + 2, e, r_w, proof_w):
+    golberg =  golberg_et_al()
+    if golberg.verify(salt, generate_hash(r_ca), j + 2, e, r_w, proof_w):
         asnPK= AsnPubKey()
         asnPK.setComponentByName('modulus', p*q) 
         asnPK.setComponentByName('publicExponent', e)
         
         pipe.append(True)
-        writeOutputFile('Gelberg Proof: valid.')
+        writeOutputFile('golberg Proof: valid.')
         writeOutputFile('OK sent to user --------->')
         lock_InformationPipe.notify()  
         lock_InformationPipe.release()
 
         return asnPK
     
-    writeOutputFile('Gelberg Proof: Not valid. Error sent to user --------->')
+    writeOutputFile('golberg Proof: Not valid. Error sent to user --------->')
     pipe.append(False)
     lock_InformationPipe.notify()  
     lock_InformationPipe.release()
 
-    raise ValueError("Gelberg Proof: Not valid")
+    raise ValueError("golberg Proof: Not valid")
 
 
 #Threads

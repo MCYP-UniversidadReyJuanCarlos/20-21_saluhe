@@ -4,7 +4,7 @@ Tecnologías empleadas:<br>
 > - Miller Rabin como test de primalidad
 > - HMAC como PRF'
 > - Funcion de Dodis-Yampolsky como PRF
-> - Gelberg et al. como prueba de conocimiento cero
+> - Golberg et al. como prueba de conocimiento cero
 
 <br>
 <h2> Esquema del protocolo</h2>
@@ -32,7 +32,7 @@ Tecnologías empleadas:<br>
     <td></td>
   </tr>
   <tr>
-    <td><img src="https://latex.codecogs.com/svg.image?\\s\leftarrow&space;r'_{u}\oplus&space;\textit{SHA-256&space;}(r_{CA})\\\left&space;(&space;\left&space;(&space;a_{\gamma}&space;\right&space;)_{\gamma=1}^{j}&space;,&space;i&space;\right&space;)\leftarrow&space;\textit{Algorithm&space;2&space;with&space;random&space;string&space;HMAC}&space;(s',\gamma,1^{\left|&space;r_{w}&space;\right|})\\p\leftarrow&space;a_{i}&space;\\q\leftarrow&space;a_{j}&space;\\N\leftarrow&space;p\ast&space;q&space;\\\pi_{W}\leftarrow&space;\Pi_{W}&space;\textit{&space;Gelberg&space;et&space;al.&space;proof&space;that&space;(N,e)&space;}\epsilon&space;\textit{&space;}L_{w}&space;\textit{&space;with&space;random&space;string&space;HMAC}(s',\textit{j&plus;2},1^{\left|&space;r_{\pi_{w}}&space;\right|})\\\\&space;" /></td>
+    <td><img src="https://latex.codecogs.com/svg.image?\\s\leftarrow&space;r'_{u}\oplus&space;\textit{SHA-256&space;}(r_{CA})\\\left&space;(&space;\left&space;(&space;a_{\gamma}&space;\right&space;)_{\gamma=1}^{j}&space;,&space;i&space;\right&space;)\leftarrow&space;\textit{Algorithm&space;2&space;with&space;random&space;string&space;HMAC}&space;(s',\gamma,1^{\left|&space;r_{w}&space;\right|})\\p\leftarrow&space;a_{i}&space;\\q\leftarrow&space;a_{j}&space;\\N\leftarrow&space;p\ast&space;q&space;\\\pi_{W}\leftarrow&space;\Pi_{W}&space;\textit{&space;Golberg&space;et&space;al.&space;proof&space;that&space;(N,e)&space;}\epsilon&space;\textit{&space;}L_{w}&space;\textit{&space;with&space;random&space;string&space;HMAC}(s',\textit{j&plus;2},1^{\left|&space;r_{\pi_{w}}&space;\right|})\\\\&space;" /></td>
     <td></td>
     <td></td>
   </tr>

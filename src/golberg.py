@@ -11,11 +11,11 @@ from pyasn1.codec.der import encoder
 from models import publicKeyRSA
 from sieve_of_eratosthenes import sieve_of_eratosthenes
 
-class gelberg_output:
+class golberg_output:
     firstTuple:publicKeyRSA
     secondTuple=[]
 
-class gelberg_key:
+class golberg_key:
     p:int
     q:int
     d_np:int
@@ -29,7 +29,7 @@ class gelberg_key:
         self.d_np=d_np
         self.q_inv=q_I
 
-class gelberg_et_al:
+class golberg_et_al:
 
     salt:univ.OctetString   #Octet string
     alpha:int               #prime number
@@ -44,7 +44,7 @@ class gelberg_et_al:
         self.e=e
         self.len=len    
 
-    def gelberg(self, p:int, q:int) -> gelberg_output:
+    def golberg(self, p:int, q:int) -> golberg_output:
         #Step 1
         m1= int(abs( self.k/ (log2(self.alpha)) ))
         m2= int(abs( -self.k / ( log2( (1/self.alpha) + (1/self.e) * (1 - (1 / self.alpha)) ) ) ))
@@ -58,12 +58,12 @@ class gelberg_et_al:
         #qInv = (inverse of q) mod p
         q_inv= q**(-1) % p
 
-        k = gelberg_key(p,q, d_np, d_nq, q_inv)
-        k_prima =gelberg_key(p,q, d_np, d_nq, q_inv)
+        k = golberg_key(p,q, d_np, d_nq, q_inv)
+        k_prima =golberg_key(p,q, d_np, d_nq, q_inv)
 
         #Step 5        
         i=1
-        result=gelberg_output()
+        result=golberg_output()
         kRSA=publicKeyRSA(N,self.e)
 
         for i in range(1,m2):
@@ -76,7 +76,7 @@ class gelberg_et_al:
         return result
 
     #  m = [0..n-1], output [0..n-1]
-    def RSAPSP1(k:gelberg_key, m) -> any :        
+    def RSAPSP1(k:golberg_key, m) -> any :        
         if m in range(0, ):
             s_1 = pow(m, k.d_np, k.p)
             s_2 = pow(m, k.d_nq, k.q)
@@ -143,7 +143,7 @@ class gelberg_et_al:
             result+= int(X[len(X)-i]) * (256 ** (len(X)-i))
         return result
 
-    def verify(self,salt, alpha, k, e, len, info:gelberg_output) -> bool:
+    def verify(self,salt, alpha, k, e, len, info:golberg_output) -> bool:
         if info != NULL and info.firstTuple != NULL and info.firstTuple.N >= 2 ** (len-1):
 
             if millerRabin(e):
