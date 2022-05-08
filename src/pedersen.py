@@ -1,4 +1,5 @@
 
+from random import randint
 from Crypto.Random import random
 from Crypto import Random
 from Crypto.Util import number
@@ -30,15 +31,20 @@ class pedersen_commitment:
             r += 1
         
         # Compute elements of G = {i^r mod q | i in Z_q*}
-        G = set() 
-        for i in range(1,4):
-            aux = i**r % q # Z_q*
-            if(aux!=1):
-                G.add(aux)
+        G = [] 
+        last_i=0
+        ctr_i = 0
+        for i in range(1,q):
+            i = randint(2,q)
+            if i!=last_i:
+                aux = i**r % q # Z_q*
+                if aux!=1 :
+                    G.append(aux)
+                    last_i = i
+                    ctr_i += 1
+                    if ctr_i == 2:
+                        break
 
-        G = list(G)
-        print("PEDERSEN. Order of G = {i^r mod q | i in Z_q*} is " + str(len(G)) + " (must be equal to p).")
-        
         # Since the order of G is prime, any element of G except 1 is a generator
         g = G[0]
         print("PEDERSEN. g = ",g)

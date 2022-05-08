@@ -1,6 +1,7 @@
 #Public key generator with verifiable randomnes
 import copy
 import os
+import sys
 import threading
 from time import gmtime, strftime
 import time
@@ -77,13 +78,8 @@ def pkgvr() -> pkgvr_output:
 
 
 def writeOutputFile(s:str):
-    lock_OutputFile.acquire()
-    if outputFile.closed : 
-        outputFile = open(outputFilePath,'w')
-
-    outputFile.write(threading.current_thread().name+ ' ' + s + '\n')
-    outputFile.close()
-
+    lock_OutputFile.acquire()    
+    outputFile.write(threading.current_thread().name+ ' ' + s + '\n')  
     lock_OutputFile.release()
 
 def user():
@@ -118,13 +114,11 @@ def user():
     pipe.append(c)
     writeOutputFile('Commitment sent to CA --------->')  
     writeOutputFile('')
-    lock_InformationPipe.notify()  
     lock_InformationPipe.release()
     time.sleep(2)
 
     #----------------------------> waiting r_ca
-    lock_InformationPipe.acquire()
-    lock_InformationPipe.wait()  
+    lock_InformationPipe.acquire() 
     r_ca = pipe.pop()
     writeOutputFile('r_ca received from CA: '+r_ca.hex())
 
@@ -158,12 +152,10 @@ def user():
     pipe.append(proof_w)
     writeOutputFile('p, q, j and Proof sent to CA --------->')     
     writeOutputFile('')
-    lock_InformationPipe.notify()  
     lock_InformationPipe.release()
     time.sleep(2)
 
     lock_InformationPipe.acquire()
-    lock_InformationPipe.wait() 
     writeOutputFile('Proof received from CA') 
 
     if(pipe.pop()):
@@ -174,13 +166,13 @@ def user():
     lock_InformationPipe.release()
     outputFile.close()
     raise ValueError("golberg Proof: Not valid")
+   
 
-def ca():
+def ca():    
     lock_InformationPipe.acquire()
-    lock_InformationPipe.wait()
     c = pipe.pop()
     writeOutputFile('Commitment received from user: ' + str(c))
-   
+
     r_ca = bytearray(mkNonce(),'ascii') 
     writeOutputFile('r_ca has been established: '+ r_ca.hex()) 
 
@@ -188,13 +180,11 @@ def ca():
     pipe.append(r_ca)
     writeOutputFile('r_ca sent to user --------->')
     writeOutputFile('')
-    lock_InformationPipe.notify()  
     lock_InformationPipe.release()
     time.sleep(2)
 
     #----------------------------> waiting proof, N, j
     lock_InformationPipe.acquire()
-    lock_InformationPipe.wait() 
 
     proof_w = pipe.pop()
     writeOutputFile('Proof from user: '+ proof_w)  
@@ -215,37 +205,40 @@ def ca():
         pipe.append(True)
         writeOutputFile('golberg Proof: valid.')
         writeOutputFile('OK sent to user --------->')
-        lock_InformationPipe.notify()  
         lock_InformationPipe.release()
 
         return asnPK
     
     writeOutputFile('golberg Proof: Not valid. Error sent to user --------->')
     pipe.append(False)
-    lock_InformationPipe.notify()  
     lock_InformationPipe.release()
 
     raise ValueError("golberg Proof: Not valid")
-
+        
 
 #Threads
-lock_OutputFile = threading.Lock()  #used to read/write in output file
-lock_InformationPipe = threading.Condition() #used to read/write in pipe structure
+try:
+    lock_OutputFile = threading.Lock()  #used to read/write in output file
+    lock_InformationPipe = threading.Lock() #used to read/write in pipe structure
 
-pipe = []
+    pipe = []
 
-outputFilePath='Output_'+strftime('%Y-%m-%dT%H%M%SZ', gmtime())+'.txt'
+    outputFilePath='Output_'+strftime('%Y-%m-%dT%H%M%SZ', gmtime())+'.txt'
 
-outputFile = open (outputFilePath,'w')
-outputFile.write('RSA Public-Key generation with verifiable randomness')
-outputFile.write('User and CA threads have been created')
+    outputFile = open (outputFilePath,'a')
+    outputFile.write('RSA Public-Key generation with verifiable randomness')
+    outputFile.write('User and CA threads have been created')
 
-user = threading.Thread(name='USER Thread' , target = user)
-ca = threading.Thread(name='CA Thread' , target = ca)
+    user_t = threading.Thread(name='USER Thread' , target = user)
+    ca_t = threading.Thread(name='CA Thread' , target = ca)
 
-user.start()
-ca.start()
-
+    user_t.start()
+    time.sleep(1)
+    ca_t.start()
+except:
+    print('Main has finished with errors')
+    outputFile.close()
+    sys.exit()
 
 #x= pkgvr()
 
