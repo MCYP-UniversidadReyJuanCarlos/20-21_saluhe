@@ -17,7 +17,8 @@ from rsa.asn1 import AsnPubKey
 
 
 e = 65537   #fixed rsa exponent
-r_w = 1536    #the RSA key length (bit-primes)
+r_w = 30    #the RSA key length (bit-primes)
+T = 300
 
 # To generate RSA moduli which are products of two (b(λ)-bit) 1536-bit primes, the instantiation
 # with the Dodis–Yampolskiy PRF uses l = 21535 + 554415 which is a Sophie Germain
@@ -53,9 +54,9 @@ def pkgvr() -> pkgvr_output:
 
     #Algorithm 2
     hmac=hmac_class()
-    alg2_collection:algorithm_2_output=algorithm_2(4, s, e, r_w, s_prima, hmac)
+    alg2_collection:algorithm_2_output=algorithm_2(T, s, e, r_w, s_prima, hmac)
     if alg2_collection.i == -1 :
-        raise ValueError("Algorithm 2: Impossible to get a valid collection of primes")
+        raise_exception(Exception("Algorithm 2: Impossible to get a valid collection of primes"))
 
     #Set p, q and N
     p = alg2_collection.a_collection.pop(alg2_collection.i)
@@ -74,7 +75,7 @@ def pkgvr() -> pkgvr_output:
         asnPK.setComponentByName('modulus',N) 
         asnPK.setComponentByName('publicExponent', e)
         return pkgvr_output(publicKeyRSA(N,e), privateKeyRSA(p,q,e))
-    raise ValueError("golberg Proof: Not valid")
+    raise_exception(Exception("golberg Proof: Not valid"))
 
 
 def writeOutputFile(s:str):
@@ -127,9 +128,9 @@ def user():
 
     #Algorithm 2
     hmac=hmac_class()
-    alg2_collection:algorithm_2_output=algorithm_2(4, s, e, r_w, s_prima, hmac)
+    alg2_collection:algorithm_2_output=algorithm_2(T, s, e, r_w, s_prima, hmac)
     if alg2_collection.i == -1 :
-        raise ValueError("Algorithm 2: Impossible to get a valid collection of primes")
+        raise_exception(Exception("Algorithm 2: Impossible to get a valid collection of primes"))
 
     #Set p, q and N
     p = alg2_collection.a_collection.pop(alg2_collection.i)
@@ -156,16 +157,15 @@ def user():
     time.sleep(2)
 
     lock_InformationPipe.acquire()
-    writeOutputFile('Proof received from CA') 
+    writeOutputFile('Proof verified from CA') 
 
     if(pipe.pop()):
         lock_InformationPipe.release()
         outputFile.close()
         return pkgvr_output(publicKeyRSA(p*q ,e), privateKeyRSA(p, q, e))
 
-    lock_InformationPipe.release()
-    outputFile.close()
-    raise ValueError("golberg Proof: Not valid")
+    lock_InformationPipe.release()    
+    raise_exception(Exception("golberg Proof: Not valid"))
    
 
 def ca():    
@@ -213,8 +213,13 @@ def ca():
     pipe.append(False)
     lock_InformationPipe.release()
 
-    raise ValueError("golberg Proof: Not valid")
+    raise_exception(Exception("golberg Proof: Not valid"))
         
+
+def raise_exception(e:Exception):
+    print('Main has finished with errors '+str(e))
+    outputFile.close()
+    sys.exit()
 
 #Threads
 try:
@@ -233,13 +238,12 @@ try:
     ca_t = threading.Thread(name='CA Thread' , target = ca)
 
     user_t.start()
-    time.sleep(1)
+    time.sleep(2)
     ca_t.start()
-except:
-    print('Main has finished with errors')
-    outputFile.close()
-    sys.exit()
+except Exception as e:
+    raise_exception(e)
 
-#x= pkgvr()
+
+
 
     
