@@ -69,7 +69,7 @@ def pkgvr() -> pkgvr_output:
     golberg = golberg_et_al(salt, s_prima, alg2_collection.a_collection.count + 2, e, r_w)
     proof_w = golberg.golberg(p,q)
     #----------------------------> send proof to CA
-    if golberg.verify(salt, generate_hash(r_ca), alg2_collection.a_collection.count + 2, e, r_w,proof_w):
+    if golberg.verify(salt, generate_hash(r_ca), alg2_collection.a_collection.count + 2, e, r_w, proof_w):
         asnPK= AsnPubKey()
         asnPK.setComponentByName('modulus',N) 
         asnPK.setComponentByName('publicExponent', e)
@@ -181,7 +181,7 @@ def ca():
     writeOutputFile('r_ca sent to user --------->')
     writeOutputFile('')
     lock_InformationPipe.release()
-    time.sleep(2)
+    time.sleep(3)
 
     #----------------------------> waiting proof, N, j
     lock_InformationPipe.acquire()

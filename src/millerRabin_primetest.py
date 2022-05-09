@@ -1,7 +1,10 @@
 from math import log2
 import math
 from random import randint
-def millerRabin(n:int) -> bool :
+def millerRabin(n:int, a:int) -> bool :
+    if a> n-2 or a<2:
+        print('random a must be between 2 and n-2')
+
     #Step 1
     prev_n= n-1
 
@@ -14,9 +17,7 @@ def millerRabin(n:int) -> bool :
     if(prev_n % 2 >0):
         return False
 
-    #Step 2. (seed() function has not be called, so random function's seed is by default 1970)
-    a = randint(2, n-2)   
-
+    #Step 2. (seed() function has not be called, so random function's seed is by default 1970)  
     #Step 3.
     x= a^d % n
     aux = x % n
@@ -42,7 +43,7 @@ def millerRabin(n:int) -> bool :
         return True
     return False
 
-def millerRabin(b:int, e:int, p:int)->bool:
+def millerRabin(b:int, e:int, p:int, a_random:int)->bool:
     if((p).bit_length != b):
         return False
-    return (millerRabin(p)) and  math.gcd( e, p-1 ) == 1
+    return (millerRabin(p, a_random)) and  math.gcd( e, p-1 ) == 1

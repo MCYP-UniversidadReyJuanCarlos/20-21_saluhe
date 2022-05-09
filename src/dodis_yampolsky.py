@@ -14,15 +14,14 @@ class dodis_yampolsky:
     def sign_sk(self,m:int):
         if m + self.sk == 0 :
             return 1
-        return ((self.g % self.t) ** (1 / (m % self.t  + self.sk % self.t))) % self.t # g ^ 1/(x+sk)
+        # g ^ 1/(x+sk)
+        return pow(self.g,(1/m+self.sk),self.t)
 
     def sign_sk_provided(self,m:int, sk:int):
         if m + sk == 0 :
-            return 1
-        #return self.g ** (1 / (m + sk))       
-        g = self.g % self.t
-        x_sk= m % self.t + self.sk % self.t
-        return ((self.g % self.t) ** (1 / (m % self.t  + self.sk % self.t))) % self.t
+            return 1 
+        # g ^ 1/(x+sk)
+        return pow(self.g, (1/m+sk), self.t)
 
     #From a security parameter (k) obtain a generator g, sk, and pk
     def gen(self, k:int):
@@ -57,8 +56,8 @@ class dodis_yampolsky:
                         break
                 
         # Since the order of G is prime, any element of G except 1 is a generator        
-        self.g = G[0]
-        self.sk= G[1]
+        self.g = G[0] % self.t
+        self.sk= G[1] % self.t
 
-        # pk= g^s
-        self.pk= self.g ^ self.sk
+        # pk= g^s mod q
+        self.pk= pow(self.g, self.sk, self.t)
