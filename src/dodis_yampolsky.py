@@ -1,8 +1,8 @@
-import math
 from Crypto.Random import random
-from Crypto import Random
 from Crypto.Util import number
 from Crypto.Util.number import bytes_to_long
+
+from fastModularExp import fastModularExponentation
 
 class dodis_yampolsky:
     sk:int
@@ -15,13 +15,13 @@ class dodis_yampolsky:
         if m + self.sk == 0 :
             return 1
         # g ^ 1/(x+sk)
-        return pow(self.g, 1/m+self.sk, self.t)
+        return fastModularExponentation(self.g, 1/m+self.sk, self.t)
 
     def sign_sk_provided(self,m:int, sk:int):
         if m + sk == 0 :
             return 1 
         # g ^ 1/(x+sk)
-        return pow(self.g, 1/m+sk, self.t)
+        return fastModularExponentation(self.g, 1/m+sk, self.t)
 
     #From a security parameter (k) obtain a generator g, sk, and pk
     def gen(self, k:int):
@@ -60,6 +60,4 @@ class dodis_yampolsky:
         self.sk= G[1]
 
         # pk= g^s 
-        self.pk= pow(self.g, self.sk, q)
-
-
+        self.pk= fastModularExponentation(self.g, self.sk, q)

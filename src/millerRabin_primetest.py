@@ -2,6 +2,8 @@ from math import log2
 import math
 from random import randint
 
+from fastModularExp import fastModularExponentation
+
 def millerRabin_2(n:int, a:int) -> bool :
     if a> n-2 or a<2:
         print('random a must be between 2 and n-2')
@@ -28,7 +30,7 @@ def millerRabin_2(n:int, a:int) -> bool :
     r=1
     #Step 4
     while True:
-        x = pow(a, int((2^r)*d), n)
+        x = fastModularExponentation(a, int((2^r)*d), n)
         if x == 1 :
             return False
         elif x == -1 :
@@ -39,7 +41,7 @@ def millerRabin_2(n:int, a:int) -> bool :
             break
 
     #Step 5: r == s-1
-    x = pow(a, int((2^(s-1))*d), n)
+    x = fastModularExponentation(a, int((2^(s-1))*d), n)
     if x == -1 :
         return True
     return False

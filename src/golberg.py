@@ -3,6 +3,8 @@ from math import log2
 import math
 import string
 from pyasn1.type import univ
+from euclidesAlgorithm import euclidesAlgorithm
+from fastModularExp import fastModularExponentation
 from hashSha256 import generate_hash
 from millerRabin_primetest import millerRabin
 from rsa.asn1 import AsnPubKey
@@ -53,10 +55,10 @@ class golberg_et_al:
         N = p*q
 
         #Step 3: get rsa key
-        d_np = pow(self.e*N, -1, p-1)
-        d_nq = pow(self.e*N, -1, q-1)
+        d_np = euclidesAlgorithm(self.e*N, -1, p-1)
+        d_nq = euclidesAlgorithm(self.e*N, -1, q-1)
         #qInv = (inverse of q) mod p
-        q_inv = pow(q, -1, p)
+        q_inv = euclidesAlgorithm(q, -1, p)
 
         k = golberg_key(p,q, d_np, d_nq, q_inv)
         k_prima = golberg_key(p,q, d_np, d_nq, q_inv)
@@ -83,8 +85,8 @@ class golberg_et_al:
     def RSASP1(k:golberg_key, m) -> any : 
         #Second form of the key. Step 2      
         
-        s_1 = pow(m, k.d_np, k.p)
-        s_2 = pow(m, k.d_nq, k.q)
+        s_1 = fastModularExponentation(m, k.d_np, k.p)
+        s_2 = fastModularExponentation(m, k.d_nq, k.q)
         h = ((s_1 - s_2) * k.q_inv) % k.p
 
         return s_2 + k.q * h
