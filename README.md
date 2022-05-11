@@ -1,14 +1,21 @@
 # 20-21_saluhe
-Tecnologías empleadas:<br>
+Tecnologías empleadas en el protocolo implementado son las siguientes:<br>
 > - Pedersen Committment como esquema de compromiso  
 > - Miller Rabin como test de primalidad
 > - HMAC como PRF'
-> - Funcion de Dodis-Yampolsky como PRF
+> - Funcion de Dodis-Yampolsky como PRF. Usada en  el [Algoritmo 2](#algoritmo-2) referenciado en el protocolo
 > - Golberg et al. como prueba de conocimiento cero
 
-<br>
-<h2> Esquema del protocolo</h2>
+## Índice:
+> - [Esquema del protocolo](#esquema-del-protocolo)
+> - [Algoritmo 2](#algoritmo-2)
+> - [PRF Dodis Yampolsky](#prf-dodis-yampolsky)
+> - [PRF HMAC](#prf-hmac)
+> - [Miller Rabin Prime Test](#miller-rabin-prime-test)
+> - [NIZK Golberg et al](#nizk-golberg-et-al)
+> - [Pedersen Commitment Scheme](#pedersen-commitment-scheme)
 
+### Esquema del protocolo
 <table>
   <tr>
     <th>USER'S ACTIONS</th>
@@ -49,4 +56,39 @@ Tecnologías empleadas:<br>
     <td><img src="https://latex.codecogs.com/svg.image?\textit{return&space;(N,e)}\\" /></td>
   </tr>
   </table>
-
+  
+  ### Algoritmo 2
+  
+  Necesita PrimeTestW, enteros T; b; e, Dodis-Yampolsky PRF, seed s. 
+  <br>
+  Devuelve una coleccion de numeros pseudo-aleatorios a y el entero i. Este entero i apunta al primer numero primo de la coleccion y el segundo numero primo esta en la ultima posicion de esta coleccion devuelta. En caso de no encontrar 2 numeros primos, i vale -1.
+  
+  <table>
+  <tr>
+    <td>
+      <img src="https://latex.codecogs.com/svg.image?\\&space;\textit{ctr,i,j&space;}\leftarrow&space;0&space;\\\\\textit{while&space;ctr&space;}<&space;2\textit{&space;and&space;j&space;}<\textit{T&space;do}\\\indent&space;\textit{j&space;}\leftarrow&space;\textit{j&plus;1}&space;\\\indent&space;a_{j}\leftarrow&space;\textit{Dodis-Yampolsky(s,j)}&space;\\\\\indent&space;\textit{if&space;PrimeTest}_{W}\textit{&space;(b,e,a}_{j}\textit{)&space;then}&space;\\\indent&space;\indent&space;\textit{if&space;ctr&space;=&space;0&space;then}\\\indent&space;\indent&space;\indent&space;\textit{i}\leftarrow&space;j&space;&space;\\\indent&space;\indent&space;\textit{endif}\\\indent&space;\indent&space;\textit{ctr}\leftarrow&space;ctr&plus;1&space;&space;\\\indent&space;\textit{endif}\\\\\textit{if&space;ctr}<2&space;\textit{&space;then}\\\indent&space;\textit{return&space;}\left&space;(&space;(a_{\gamma})_{\gamma&space;=&space;1}^{j},&space;\textit{-1}&space;\right&space;)&space;\\\textit{else}\\\indent&space;\textit{return&space;}\left&space;(&space;(a_{\gamma})_{\gamma&space;=&space;1}^{j},&space;i&space;\right&space;)&space;\\&space;\textit{endif}&space;" />
+    </td>
+  </tr>
+  
+  </table>
+  
+  ### PRF Dodis Yampolsky
+  
+  
+  
+  ### PRF HMAC
+  
+  
+  
+  ### Miller Rabin Prime Test
+  
+  
+  
+  ### NIZK Golberg et al
+  
+  
+  
+  ### Pedersen Commitment Scheme
+  
+  
+  
