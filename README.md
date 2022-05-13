@@ -82,6 +82,17 @@ Tecnologías empleadas en el protocolo implementado son las siguientes:<br>
   
   ### Miller Rabin Prime Test
   
+  Input : n (n is the number to be tested for primality) 
+  <br>
+  Output : whether n is prime or not
+  
+  <table>
+  <tr>
+    <td>
+      <img src="https://latex.codecogs.com/svg.image?\\\textit{n-1&space;=&space;2}^{s}d\textit{&space;&space;d}&space;\epsilon&space;N,&space;\textit{&space;&space;s}\epsilon&space;N\\\textit{Choose&space;a&space;random&space;integer&space;a&space;where&space;}2\leq&space;a\leq&space;n-2\\\\X\equiv&space;a^{d}(modn)\\&space;\textit{If&space;X}\equiv\pm&space;1(modn)\\\indent&space;\textit{return&space;'n&space;is&space;probably&space;prime'}\\\textit{If&space;s=1}\equiv\pm&space;1(modn)\\\indent&space;\textit{return&space;'n&space;is&space;de&space;finitely&space;not&space;prime'}\\&space;\\r=1\\\\\textbf{Step&space;3}\\&space;X\equiv&space;a^{2^{r}d}(modn)\\&space;\textit{If&space;X}\equiv&space;1(modn)\\\indent&space;\textit{return&space;'n&space;is&space;de&space;finitely&space;not&space;prime'}\\\textit{If&space;X}\equiv&space;-1(modn)\\\indent&space;\textit{return&space;'n&space;is&space;probably&space;prime'}\\&space;r=r&plus;1\\\textit{If&space;r&space;!=&space;s-1}\\\indent&space;\textit{then&space;go&space;to&space;Step&space;3}\\\\X\equiv&space;a^{2^{s-1}d}(modn)\\&space;\textit{If&space;X}\not\equiv&space;&space;-1(modn)\\\indent&space;\textit{return&space;'n&space;is&space;de&space;finitely&space;not&space;prime'}\\\textit{If&space;X}\equiv&space;-1(modn)\\\indent&space;\textit{return&space;'n&space;is&space;probably&space;prime'}&space;" />
+   </td>
+  </tr>
+  </table>
   
   
   ### NIZK Golberg et al
