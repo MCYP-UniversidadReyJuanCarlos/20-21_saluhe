@@ -62,4 +62,4 @@ def mymod(A,B):
     # A=B*Q+R, where  0 <= R < B
     # A mod B = R
     # R= A-B*Q, Q=floor(A/B)
-    return A - math.floor(A/B)*B
+    return A - math.floor(A // B)*B #  use // to get an integer back from the division of the two integers
