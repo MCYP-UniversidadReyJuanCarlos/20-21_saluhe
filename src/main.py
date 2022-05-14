@@ -14,10 +14,13 @@ from nonce import mkNonce
 from pedersen import pedersen_commitment
 from pyasn1.type import univ
 from rsa.asn1 import AsnPubKey
-
+from random import randint
+from Crypto.Random import random
+from Crypto import Random
+from Crypto.Util import number
 
 e = 65537   #fixed rsa exponent
-r_w = 30    #the RSA key length (bit-primes)
+r_w = 25    #the RSA key length (bit-primes)
 T = 300
 
 # To generate RSA moduli which are products of two (b(λ)-bit) 1536-bit primes, the instantiation
@@ -218,8 +221,88 @@ def ca():
 
 def raise_exception(e:Exception):
     print('Main has finished with errors '+str(e))
+    writeOutputFile(str(e))
     outputFile.close()
     sys.exit()
+
+
+def test_golberg():    
+    lock_InformationPipe.acquire()
+    r_u = bytearray(mkNonce(),'ascii')
+    s_prima = generate_hash(r_u)
+    p = number.getPrime(12, Random.new().read)
+    print("p = ",p)
+        
+    r = 1
+    while True:
+        q = r*p + 1
+        if number.isPrime(q):
+            print("q = ",q)
+            break
+        r += 1
+
+    j = 2
+    N = p*q
+    writeOutputFile('N has been established: ' + str(N)) 
+
+    #golberg     
+    salt = univ.OctetString(os.urandom(32)) #Nist recommend salt string of at least 32 bit
+    #HMAC(s',j+2,r_w)
+    golberg = golberg_et_al(salt, s_prima, j + 2, e, r_w)
+    proof_w = golberg.golberg(p,q)
+    
+    pipe.append(q)
+    pipe.append(p)
+    pipe.append(j)
+    pipe.append(proof_w)
+    writeOutputFile('p, q, j and Proof sent to CA --------->')     
+    writeOutputFile('')
+    lock_InformationPipe.release()
+    time.sleep(2)
+
+    lock_InformationPipe.acquire()
+    writeOutputFile('Proof verified from CA') 
+
+    if(pipe.pop()):
+        lock_InformationPipe.release()
+        outputFile.close()
+        return pkgvr_output(publicKeyRSA(p*q ,e), privateKeyRSA(p, q, e))
+
+    lock_InformationPipe.release()    
+    raise_exception(Exception("golberg Proof: Not valid"))
+
+
+def test_golberg_ca():
+    lock_InformationPipe.acquire()
+    r_ca = bytearray(mkNonce(),'ascii') 
+    proof_w = pipe.pop()
+    writeOutputFile('Proof from user: '+ proof_w)  
+    j = pipe.pop()
+    writeOutputFile('j from user: ' + str(j))  
+    p = pipe.pop()
+    writeOutputFile('p from user: ' + str(p))
+    q = pipe.pop()
+    writeOutputFile('p from user: ' + str(q)) 
+
+    salt = univ.OctetString(os.urandom(32)) #Nist recommend salt string of at least 32 bit
+    golberg =  golberg_et_al()
+    if golberg.verify(salt, generate_hash(r_ca), j + 2, e, r_w, proof_w):
+        asnPK= AsnPubKey()
+        asnPK.setComponentByName('modulus', p*q) 
+        asnPK.setComponentByName('publicExponent', e)
+        
+        pipe.append(True)
+        writeOutputFile('golberg Proof: valid.')
+        writeOutputFile('OK sent to user --------->')
+        lock_InformationPipe.release()
+
+        return asnPK
+    
+    writeOutputFile('golberg Proof: Not valid. Error sent to user --------->')
+    pipe.append(False)
+    lock_InformationPipe.release()
+
+    raise_exception(Exception("golberg Proof: Not valid"))
 
 #Threads
 try:
@@ -234,11 +317,11 @@ try:
     outputFile.write('RSA Public-Key generation with verifiable randomness')
     outputFile.write('User and CA threads have been created')
 
-    user_t = threading.Thread(name='USER Thread' , target = user)
-    ca_t = threading.Thread(name='CA Thread' , target = ca)
+    user_t = threading.Thread(name='USER Thread' , target = test_golberg)
+    ca_t = threading.Thread(name='CA Thread' , target = test_golberg_ca)
 
     user_t.start()
-    time.sleep(4)
+    time.sleep(1)
     ca_t.start()
 except Exception as e:
     raise_exception(e)
