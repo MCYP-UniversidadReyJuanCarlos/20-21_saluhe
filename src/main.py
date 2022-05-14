@@ -238,7 +238,7 @@ try:
     ca_t = threading.Thread(name='CA Thread' , target = ca)
 
     user_t.start()
-    time.sleep(2)
+    time.sleep(4)
     ca_t.start()
 except Exception as e:
     raise_exception(e)

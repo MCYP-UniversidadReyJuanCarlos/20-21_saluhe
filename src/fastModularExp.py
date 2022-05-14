@@ -1,10 +1,9 @@
 import math
-
-from euclidesAlgorithm import euclidesAlgorithm
+import gmpy2
 
 def fastModularExponentation(A:float, B:float, C:float):     
     if(B == -1):
-        return euclidesAlgorithm()
+        return gmpy2.invert(A, C)
     binB= numtobin(B)    
     Bdigits= len(binB) 
     AtoBmodC=[None]*Bdigits
@@ -64,6 +63,3 @@ def mymod(A,B):
     # A mod B = R
     # R= A-B*Q, Q=floor(A/B)
     return A - math.floor(A/B)*B
-
-
-print(fastModularExponentation(3,-1,9))

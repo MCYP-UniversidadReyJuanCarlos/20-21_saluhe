@@ -3,7 +3,6 @@ from math import log2
 import math
 import string
 from pyasn1.type import univ
-from euclidesAlgorithm import euclidesAlgorithm
 from fastModularExp import fastModularExponentation
 from hashSha256 import generate_hash
 from millerRabin_primetest import millerRabin
@@ -12,6 +11,7 @@ from pyasn1.codec.der import encoder
 from Crypto.Util.number import ceil_div
 from models import publicKeyRSA
 from sieve_of_eratosthenes import sieve_of_eratosthenes
+import gmpy2
 
 class golberg_output:
     firstTuple:AsnPubKey
@@ -55,10 +55,10 @@ class golberg_et_al:
         N = p*q
 
         #Step 3: get rsa key
-        d_np = euclidesAlgorithm(self.e*N, -1, p-1)
-        d_nq = euclidesAlgorithm(self.e*N, -1, q-1)
+        d_np = gmpy2.invert(self.e*N, p-1) #N^-1 mod p-1
+        d_nq = gmpy2.invert(self.e*N, q-1) #N^-1 mod q-1
         #qInv = (inverse of q) mod p
-        q_inv = euclidesAlgorithm(q, -1, p)
+        q_inv = gmpy2.invert(q, p)
 
         k = golberg_key(p,q, d_np, d_nq, q_inv)
         k_prima = golberg_key(p,q, d_np, d_nq, q_inv)
