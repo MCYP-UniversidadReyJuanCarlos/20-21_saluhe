@@ -47,42 +47,46 @@ class golberg_et_al:
         self.len=len    
 
     def golberg(self, p:int, q:int) -> golberg_output:
-        #Step 1
-        m1= int(abs( self.k / (log2(self.alpha)) ))
-        m2= int(abs( -self.k / ( log2( (1/self.alpha) + (1/self.e) * (1 - (1 / self.alpha)) ) ) ))
+        try:
+            #Step 1
+            m1 = math.ceil( self.k / (log2(self.alpha)) )
+            m2 = math.ceil( -self.k / ( log2( (1/self.alpha) + (1/self.e) * (1 - (1 / self.alpha)) ) ) )
 
-        #Step 2
-        N = p*q
+            #Step 2
+            N = p*q
 
-        #Step 3: get rsa key
-        d_np = gmpy2.invert(self.e*N, p-1) #N^-1 mod p-1
-        d_nq = gmpy2.invert(self.e*N, q-1) #N^-1 mod q-1
-        #qInv = (inverse of q) mod p
-        q_inv = gmpy2.invert(q, p)
+            #Step 3: get rsa key
+            q_inv = int(gmpy2.invert(q, p))#qInv = (inverse of q) mod p
+            d_np = int(gmpy2.invert(self.e, p-1)) #e^-1 mod p-1
+            d_nq = int(gmpy2.invert(self.e, q-1)) #e^-1 mod q-1
+            k = golberg_key(p,q, d_np, d_nq, q_inv)
 
-        k = golberg_key(p,q, d_np, d_nq, q_inv)
-        k_prima = golberg_key(p,q, d_np, d_nq, q_inv)
+            d_np_prima = int(gmpy2.invert(self.e*N, p-1)) #eN^-1 mod p-1
+            d_nq_prima = int(gmpy2.invert(self.e*N, q-1)) #eN^-1 mod q-1
+            k_prima = golberg_key(p,q, d_np_prima, d_nq_prima, q_inv)
 
-        #Step 5        
-        i=1
-        result=golberg_output()
-        asnKRSA= AsnPubKey()
-        asnKRSA.setComponentByName('modulus', N) 
-        asnKRSA.setComponentByName('publicExponent', self.e)
-        for i in range(1,m2+1):
-            p_i = self.getRho(asnKRSA, self.salt, i, self.len, m2)
-            if p_i not in range(0, N-1):
-                raise ValueError("Golberg: Message representative out of range")
-            if i <= m1:                
-                result.secondTuple.append(self.RSASP1(k_prima, p_i))
-                continue
-            
-            result.secondTuple.append(self.RSASP1(k, p_i))
+            #Step 5        
+            i=1
+            result=golberg_output()
+            asnKRSA= AsnPubKey()
+            asnKRSA.setComponentByName('modulus', N) 
+            asnKRSA.setComponentByName('publicExponent', self.e)
+            for i in range(1,int(m2+1)):
+                p_i = self.getRho(asnKRSA, self.salt, i, self.len, m2)
+                if p_i not in range(0, N-1):
+                    raise ValueError("Golberg: Message representative out of range")
+                if i <= m1:                
+                    result.secondTuple.append(self.RSASP1(k_prima, p_i))
+                    continue
+                
+                result.secondTuple.append(self.RSASP1(k, p_i))
 
-        return result
+            return result
+        except Exception as e:
+            raise e
 
     #  m = [0..n-1], output [0..n-1]
-    def RSASP1(k:golberg_key, m) -> any : 
+    def RSASP1(self,k:golberg_key, m) -> any : 
         #Second form of the key. Step 2      
         
         s_1 = fastModularExponentation(m, k.d_np, k.p)
@@ -91,10 +95,9 @@ class golberg_et_al:
 
         return s_2 + k.q * h
 
-    def getRho(self, asnPK:AsnPubKey, salt:string, i:int, len:int, m2:int) -> any :
+    def getRho(self, asnPK:AsnPubKey, salt:univ.OctetString, i:int, len:int, m2:int) -> any :
         #Octet long of m2
-        m2_long= abs((1/8) * (log2(m2+1)))
-
+        m2_long= abs(math.ceil((1/8) * (log2(m2+1))))
         #PK ASN.1 octet string encoding of the RSA public key (N, e)
         PK = univ.OctetString(encoder.encode(asnPK))
         #EI= I2OSP(i, |m2|) be the |m2|-octet long string encoding of the integer i
@@ -102,8 +105,10 @@ class golberg_et_al:
 
         j=1
         while(True):
-            EJ = self.I2OSP(j, abs((1/8) * (log2(j+1))))
-            s = PK.append(salt.append(EI.append(EJ)))
+            EJ = self.I2OSP(j, abs(math.ceil((1/8) * (log2(j+1)))))
+            result_concat = str(PK) + str(salt) + str(EI) + str(EJ)
+            
+            s = univ.OctetString(result_concat)
             ER = self.MGF1_SHA256(s, len)
             p_i = self.OS2IP(ER)
 
@@ -113,7 +118,7 @@ class golberg_et_al:
             j += 1       
 
     # non negative integer to octet string
-    def I2OSP(x:int, xLen:int):
+    def I2OSP(self, x:int, xLen:int):
         result=univ.OctetString('')
         if x < 256**xLen:
             i = 1
@@ -121,9 +126,9 @@ class golberg_et_al:
             for i in range(1, xLen+1):
                 #append 0
                 if xLen-i > len(int_str):
-                    result += 0
+                    result += univ.OctetString(0)
                 else: 
-                    result += int(int_str[xLen]) * (256 ** (xLen-i))
+                    result += univ.OctetString(int(int_str[xLen-i]) * (256 ** (xLen-i)))
             return result
 
         raise ValueError("integer too large")
@@ -145,33 +150,33 @@ class golberg_et_al:
         return T
 
     # from octet string to int
-    def OS2IP(X:univ.OctetString) -> int:
+    def OS2IP(self, X:univ.OctetString) -> int:
         result = 0       
         for i in range(1, len(X)+1):
             result += int(X[len(X)-i]) * (256 ** (len(X)-i))
         return result
 
-    def verify(self,salt, alpha, k, e, len, info:golberg_output) -> bool:
+    def verify(self, info:golberg_output) -> bool:
         if info != NULL and info.firstTuple != NULL and info.firstTuple.getComponentByName('modulus') >= 2 ** (len-1):
 
-            if millerRabin(e):
+            if millerRabin(self.e):
                 #Set m1, m2
-                m1= int(abs( k/ (log2(alpha)) ))
-                m2= int(abs( k / ( log2( (1/alpha) + (1/e) * (1 - (1 / alpha)) ) ) ))
+                m1= int(abs( self.k / (log2(self.alpha)) ))
+                m2= int(abs( self.k / ( log2( (1/self.alpha) + (1/self.e) * (1 - (1 / self.alpha)) ) ) ))
 
                 if info.secondTuple!= NULL and info.secondTuple.count == m2:
                     #Primes vector that included all primes numbers <= alpha-1
-                    primes_vector = sieve_of_eratosthenes(alpha-1)
+                    primes_vector = sieve_of_eratosthenes(self.alpha-1)
 
                     if math.gcd(primorial(primes_vector),
                         info.firstTuple.getComponentByName('modulus')) == 1 :
 
                         weird_key = AsnPubKey()
                         weird_key.setComponentByName('modulus', info.firstTuple.getComponentByName('modulus'))
-                        weird_key.setComponentByName('publicExponent', e * info.firstTuple.getComponentByName('modulus'))
+                        weird_key.setComponentByName('publicExponent', self.e * info.firstTuple.getComponentByName('modulus'))
                         
                         for i in range(0,m2):
-                            pi=self.getRho(info.firstTuple, salt, i+1,len,m2)
+                            pi=self.getRho(info.firstTuple, self.salt, i+1,len,m2)
                             
                             if i<=m1 and pi!=self.RSAVP1(weird_key, info.secondTuple[i]):
                                 #ρi = RSAVP1((N, eN), σi)
@@ -188,7 +193,7 @@ class golberg_et_al:
     #   s signature representative, an integer between 0 and n - 1  
     # Output:
     #   m message representative, an integer between 0 and n - 1
-    def RSAVP1(key:AsnPubKey, s:int)-> int:
+    def RSAVP1(self, key:AsnPubKey, s:int)-> int:
         if s<0 or s >  key.getComponentByName('modulus')-1:
             raise ValueError("signature representative out of range")
         return (s**key.getComponentByName('publicExponent')) %  key.getComponentByName('modulus')

@@ -10,8 +10,8 @@ class pedersen_commitment:
     h:any
     q:any #g order
     
-    def __init__(self):
-        list = self.setup(1024)
+    def __init__(self, k):
+        list = self.setup(k)
         self.q=list[0]
         self.g=list[1]
         self.h=list[2]

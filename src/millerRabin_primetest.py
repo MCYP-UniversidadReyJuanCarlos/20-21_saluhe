@@ -46,7 +46,7 @@ def millerRabin_2(n:int, a:int) -> bool :
         return True
     return False
 
-def millerRabin(b:int, e:int, p:int, a_random:int) -> bool:    
+def millerRabin(e:int, p:int, a_random:int) -> bool:    
     #if((p).bit_length() != b):
        # return False
     return (millerRabin_2(p, a_random)) and  math.gcd( e, p-1 ) == 1
