@@ -244,7 +244,7 @@ def test_golberg():
 
     #HMAC(s',j+2,r_w)
     hmac= hmac_class()   
-    salt = univ.OctetString(hmac.hmac_method(r_w, s_prima, int.to_bytes(j+2, r_w,'big'))) #Nist recommend salt string of at least 32 bit
+    salt = univ.OctetString(hmac.hmac_method(r_w, s_prima, int.to_bytes(j+2, r_w,'big')).hex()) #Nist recommend salt string of at least 32 bit
     
     alpha = number.getPrime(6, Random.new().read) #alpha small prime α (about 16 bits long or less)
     golberg = golberg_et_al(salt, alpha, k, e, r_w)

@@ -99,7 +99,7 @@ class golberg_et_al:
         #Octet long of m2
         m2_long= abs(math.ceil((1/8) * (log2(m2+1))))
         #PK ASN.1 octet string encoding of the RSA public key (N, e)
-        PK = univ.OctetString(encoder.encode(asnPK))
+        PK = univ.OctetString(encoder.encode(asnPK).hex())
         #EI= I2OSP(i, |m2|) be the |m2|-octet long string encoding of the integer i
         EI = self.I2OSP(i, m2_long)
 
@@ -113,23 +113,23 @@ class golberg_et_al:
             p_i = self.OS2IP(ER)
 
             #This step tests if p_i in Z_N
-            if p_i < asnPK.N : 
+            if p_i < asnPK.getComponentByName("modulus") : 
                 return p_i
             j += 1       
 
     # non negative integer to octet string
-    def I2OSP(self, x:int, xLen:int):
-        result=univ.OctetString('')
+    def I2OSP(self, x:int, xLen:int) -> univ.OctetString:
+        result=""
         if x < 256**xLen:
             i = 1
             int_str = str(x)
             for i in range(1, xLen+1):
                 #append 0
-                if xLen-i > len(int_str):
-                    result += univ.OctetString(0)
+                if xLen-i >= len(int_str):
+                    result += str(0)
                 else: 
-                    result += univ.OctetString(int(int_str[xLen-i]) * (256 ** (xLen-i)))
-            return result
+                    result += str(int(int_str[xLen-i]) * (256 ** (xLen-i)))
+            return univ.OctetString(result)
 
         raise ValueError("integer too large")
 
@@ -140,20 +140,21 @@ class golberg_et_al:
         hlen = 256
         if maskLen > (2**32) * hlen :
             raise ValueError("mask too long")
-        T = univ.OctetString('')
+        T = str('')
 
         long = ceil_div(maskLen, hlen)
         for counter in range(0, long):
             C = self.I2OSP(counter, 4) # counter to octet string
-            T += generate_hash(mgfSeed + C)
+            T += generate_hash(bytearray.fromhex(str(mgfSeed) + str(C))).hex() #T = T || Hash(mgfSeed || C)
 
-        return T
+        return univ.OctetString(T)
 
     # from octet string to int
     def OS2IP(self, X:univ.OctetString) -> int:
-        result = 0       
-        for i in range(1, len(X)+1):
-            result += int(X[len(X)-i]) * (256 ** (len(X)-i))
+        result = 0    
+        xLen = len(X)
+        for i in range(1, xLen+1):
+            result += int(X[xLen-i]) * (256 ** (xLen-i))
         return result
 
     def verify(self, info:golberg_output) -> bool:
@@ -208,3 +209,5 @@ def primorial(vector:any)-> int:
     for a in vector:
         result*=a
     return result
+
+
