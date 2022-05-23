@@ -72,7 +72,7 @@ def pkgvr() -> pkgvr_output:
     salt = univ.OctetString(os.urandom(32)) #Nist recommend salt string of at least 32 bit
     #HMAC(s',j+2,r_w)
     golberg = golberg_et_al(salt, s_prima, alg2_collection.a_collection.count + 2, e, r_w)
-    proof_w = golberg.golberg(p,q)
+    proof_w = golberg.prove(p,q)
     #----------------------------> send proof to CA
     if golberg.verify(salt, generate_hash(r_ca), alg2_collection.a_collection.count + 2, e, r_w, proof_w):
         asnPK= AsnPubKey()
@@ -149,7 +149,7 @@ def user():
     salt = univ.OctetString(os.urandom(32)) #Nist recommend salt string of at least 32 bit
     #HMAC(s',j+2,r_w)
     golberg = golberg_et_al(salt, s_prima, alg2_collection.a_collection.count + 2, e, r_w)
-    proof_w = golberg.golberg(p,q)
+    proof_w = golberg.prove(p,q)
     
     pipe.append(q)
     pipe.append(p)
@@ -244,11 +244,11 @@ def test_golberg():
 
     #HMAC(s',j+2,r_w)
     hmac= hmac_class()   
-    salt = univ.OctetString(hmac.hmac_method(r_w, s_prima, int.to_bytes(j+2, r_w,'big')).hex()) #Nist recommend salt string of at least 32 bit
+    salt = univ.OctetString(univ.OctetString.fromHexString(hmac.hmac_method(r_w, s_prima, int.to_bytes(j+2, r_w,'big')).hex())) #Nist recommend salt string of at least 32 bit
     
     alpha = number.getPrime(6, Random.new().read) #alpha small prime α (about 16 bits long or less)
     golberg = golberg_et_al(salt, alpha, k, e, r_w)
-    proof_w = golberg.golberg(p,q)
+    proof_w = golberg.prove(p,q)
         
     pipe.append(golberg)
     pipe.append(proof_w)

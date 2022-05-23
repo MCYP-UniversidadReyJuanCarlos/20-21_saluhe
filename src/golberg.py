@@ -46,7 +46,7 @@ class golberg_et_al:
         self.e=e
         self.len=len    
 
-    def golberg(self, p:int, q:int) -> golberg_output:
+    def prove(self, p:int, q:int) -> golberg_output:
         try:
             #Step 1
             m1 = math.ceil( self.k / (log2(self.alpha)) )
@@ -99,14 +99,15 @@ class golberg_et_al:
         #Octet long of m2
         m2_long= abs(math.ceil((1/8) * (log2(m2+1))))
         #PK ASN.1 octet string encoding of the RSA public key (N, e)
-        PK = univ.OctetString(encoder.encode(asnPK).hex())
+        PK = univ.OctetString(univ.OctetString.fromHexString(encoder.encode(asnPK).hex()))
+        
         #EI= I2OSP(i, |m2|) be the |m2|-octet long string encoding of the integer i
         EI = self.I2OSP(i, m2_long)
 
         j=1
         while(True):
             EJ = self.I2OSP(j, abs(math.ceil((1/8) * (log2(j+1)))))
-            result_concat = str(PK) + str(salt) + str(EI) + str(EJ)
+            result_concat = strFromOctetString(PK) + strFromOctetString(salt) + strFromOctetString(EI) + strFromOctetString(EJ)
             
             s = univ.OctetString(result_concat)
             ER = self.MGF1_SHA256(s, len)
@@ -119,17 +120,19 @@ class golberg_et_al:
 
     # non negative integer to octet string
     def I2OSP(self, x:int, xLen:int) -> univ.OctetString:
-        result=""
+        result = list()
         if x < 256**xLen:
             i = 1
             int_str = str(x)
             for i in range(1, xLen+1):
                 #append 0
                 if xLen-i >= len(int_str):
-                    result += str(0)
+                    result.append(0)
                 else: 
-                    result += str(int(int_str[xLen-i]) * (256 ** (xLen-i)))
-            return univ.OctetString(result)
+                    result.append(int(int_str[xLen-i]) * (256 ** (xLen-i)))
+                    
+            numberAsTuple = tuple(result)            
+            return univ.OctetString(numberAsTuple)
 
         raise ValueError("integer too large")
 
@@ -145,16 +148,23 @@ class golberg_et_al:
         long = ceil_div(maskLen, hlen)
         for counter in range(0, long):
             C = self.I2OSP(counter, 4) # counter to octet string
-            T += generate_hash(bytearray.fromhex(str(mgfSeed) + str(C))).hex() #T = T || Hash(mgfSeed || C)
+            concatOctetStr = strFromOctetString(mgfSeed) + strFromOctetString(C)
+            bytearrayFromOctet = bytearray(concatOctetStr, mgfSeed.encoding)
+            hashT = generate_hash(bytearrayFromOctet)
+            T += hashT.hex() #T = T || Hash(mgfSeed || C)
 
-        return univ.OctetString(T)
+        return univ.OctetString(univ.OctetString.fromHexString(T))
+
+    
 
     # from octet string to int
     def OS2IP(self, X:univ.OctetString) -> int:
-        result = 0    
-        xLen = len(X)
+        result = 0 
+        xAsString = X.asNumbers()   
+        xLen = len(xAsString)
         for i in range(1, xLen+1):
-            result += int(X[xLen-i]) * (256 ** (xLen-i))
+            x_elem = xAsString[xLen-i]
+            result += int(x_elem) * (256 ** (xLen-i))
         return result
 
     def verify(self, info:golberg_output) -> bool:
@@ -209,5 +219,8 @@ def primorial(vector:any)-> int:
     for a in vector:
         result*=a
     return result
+
+def strFromOctetString(mgfSeed:univ.OctetString) -> str:
+        return mgfSeed.asOctets().decode(mgfSeed.encoding)
 
 
