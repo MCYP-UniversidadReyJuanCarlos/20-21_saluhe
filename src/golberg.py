@@ -118,7 +118,8 @@ class golberg_et_al:
                 return p_i
             j += 1       
 
-    # non negative integer to octet string
+    # non negative integer to octet string. 
+    # Most significant at the beginning
     def I2OSP(self, x:int, xLen:int) -> univ.OctetString:
         result = list()
         if x < 256**xLen:
@@ -140,7 +141,9 @@ class golberg_et_al:
     #           maskLen  intended length in octets of the mask, at most 2^32 hLen
     # *hash length fixed in 256 (SHA-256)
     def MGF1_SHA256(self, mgfSeed:univ.OctetString, maskLen:int):
-        hlen = 256
+        hlen = 256 // 8 #in octets
+
+        maskLen //= 8
         if maskLen > (2**32) * hlen :
             raise ValueError("mask too long")
         T = str('')

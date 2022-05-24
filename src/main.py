@@ -231,9 +231,9 @@ def test_golberg():
     lock_InformationPipe.acquire()
     r_u = bytearray(mkNonce(),'ascii')
     s_prima = generate_hash(r_u)
-    p = number.getPrime(12, Random.new().read)
+    p = number.getPrime(25, Random.new().read)
     print("p = ",p)
-    q = number.getPrime(12, Random.new().read)
+    q = number.getPrime(25, Random.new().read)
     
     
     j = 2
