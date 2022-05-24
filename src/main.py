@@ -20,7 +20,7 @@ from Crypto.Util import number
 import gmpy2
 
 e = 65537   #fixed rsa exponent
-r_w = 25    #the RSA key length (bit-primes)
+r_w = 32    #the RSA key length (bit-primes)
 T = 300
 k = 128     #security parameter for: Golberg / pedersen / Dodis-Yampolsky
 
@@ -231,9 +231,9 @@ def test_golberg():
     lock_InformationPipe.acquire()
     r_u = bytearray(mkNonce(),'ascii')
     s_prima = generate_hash(r_u)
-    p = number.getPrime(25, Random.new().read)
+    p = number.getPrime(32, Random.new().read)
     print("p = ",p)
-    q = number.getPrime(25, Random.new().read)
+    q = number.getPrime(32, Random.new().read)
     
     
     j = 2
@@ -246,8 +246,8 @@ def test_golberg():
     hmac= hmac_class()   
     salt = univ.OctetString(univ.OctetString.fromHexString(hmac.hmac_method(r_w, s_prima, int.to_bytes(j+2, r_w,'big')).hex())) #Nist recommend salt string of at least 32 bit
     
-    alpha = number.getPrime(6, Random.new().read) #alpha small prime α (about 16 bits long or less)
-    golberg = golberg_et_al(salt, alpha, k, e, r_w)
+    alpha = number.getPrime(8, Random.new().read) #alpha small prime α (about 16 bits long or less)
+    golberg = golberg_et_al(salt, alpha, k, e, N.bit_length())
     proof_w = golberg.prove(p,q)
         
     pipe.append(golberg)

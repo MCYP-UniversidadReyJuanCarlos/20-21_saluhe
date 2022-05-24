@@ -44,7 +44,7 @@ class golberg_et_al:
         self.alpha=alpha
         self.k=k
         self.e=e
-        self.len=len    
+        self.len=len    #Length in bits RSA modulus(N)
 
     def prove(self, p:int, q:int) -> golberg_output:
         try:
@@ -97,13 +97,14 @@ class golberg_et_al:
 
     def getRho(self, asnPK:AsnPubKey, salt:univ.OctetString, i:int, len:int, m2:int) -> any :
         #Octet long of m2
-        m2_long= abs(math.ceil((1/8) * (log2(m2+1))))
+        m2_long= abs(math.ceil( (1/8) * (log2(m2+1)) ))
         #PK ASN.1 octet string encoding of the RSA public key (N, e)
-        PK = univ.OctetString(univ.OctetString.fromHexString(encoder.encode(asnPK).hex()))
+        pk_encoded = encoder.encode(asnPK)
+        PK = univ.OctetString(univ.OctetString.fromHexString(pk_encoded.hex()))
         
         #EI= I2OSP(i, |m2|) be the |m2|-octet long string encoding of the integer i
         EI = self.I2OSP(i, m2_long)
-
+        
         j=1
         while(True):
             EJ = self.I2OSP(j, abs(math.ceil((1/8) * (log2(j+1)))))
@@ -171,7 +172,7 @@ class golberg_et_al:
         return result
 
     def verify(self, info:golberg_output) -> bool:
-        if info != NULL and info.firstTuple != NULL and info.firstTuple.getComponentByName('modulus') >= 2 ** (len-1):
+        if info != NULL and info.firstTuple != NULL and info.firstTuple.getComponentByName('modulus') >= 2 ** (self.len - 1):
 
             if millerRabin(self.e):
                 #Set m1, m2
@@ -190,7 +191,7 @@ class golberg_et_al:
                         weird_key.setComponentByName('publicExponent', self.e * info.firstTuple.getComponentByName('modulus'))
                         
                         for i in range(0,m2):
-                            pi=self.getRho(info.firstTuple, self.salt, i+1,len,m2)
+                            pi=self.getRho(info.firstTuple, self.salt, i+1, self.len, m2)
                             
                             if i<=m1 and pi!=self.RSAVP1(weird_key, info.secondTuple[i]):
                                 #ρi = RSAVP1((N, eN), σi)
