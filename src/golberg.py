@@ -1,7 +1,6 @@
 from asyncio.windows_events import NULL
 from math import log2
 import math
-import string
 from pyasn1.type import univ
 from fastModularExp import fastModularExponentation
 from hashSha256 import generate_hash
@@ -9,9 +8,9 @@ from millerRabin_primetest import millerRabin
 from rsa.asn1 import AsnPubKey
 from pyasn1.codec.der import encoder
 from Crypto.Util.number import ceil_div
-from models import publicKeyRSA
 from sieve_of_eratosthenes import sieve_of_eratosthenes
 import gmpy2
+from pkcs1 import primitives
 
 class golberg_output:
     firstTuple:AsnPubKey
@@ -102,7 +101,7 @@ class golberg_et_al:
         PK = univ.OctetString(univ.OctetString.fromHexString(encoder.encode(asnPK).hex()))
         
         #EI= I2OSP(i, |m2|) be the |m2|-octet long string encoding of the integer i
-        EI = self.I2OSP(i, m2_long)
+        EI = univ.OctetString(primitives.i2osp(i, m2_long))
 
         j=1
         while(True):
@@ -112,6 +111,7 @@ class golberg_et_al:
             s = univ.OctetString(result_concat)
             ER = self.MGF1_SHA256(s, len)
             p_i = self.OS2IP(ER)
+            p_i= primitives.os2ip(ER.asOctets())
 
             #This step tests if p_i in Z_N
             if p_i < asnPK.getComponentByName("modulus") : 
@@ -169,6 +169,7 @@ class golberg_et_al:
             x_elem = xAsString[xLen-i]
             result += int(x_elem) * (256 ** (xLen-i))
         return result
+
 
     def verify(self, info:golberg_output) -> bool:
         if info != NULL and info.firstTuple != NULL and info.firstTuple.getComponentByName('modulus') >= 2 ** (len-1):
