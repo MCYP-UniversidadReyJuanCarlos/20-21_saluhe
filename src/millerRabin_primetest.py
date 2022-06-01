@@ -7,6 +7,7 @@ from pkcs1.defaults import default_pseudo_random, default_crypto_random
 
 #   n: Integer to be tested
 #   a: random number
+#   k fixed number of iterations http://stackoverflow.com/questions/6325576/how-many-iterations-of-rabin-miller-should-i-use-for-cryptographic-safe-primes
 def millerRabin_2(n:int, a:int) -> bool :
     if a> n-2 or a<2:
         print('random a must be between 2 and n-2')
@@ -45,9 +46,11 @@ def millerRabin_2(n:int, a:int) -> bool :
 
     #Step 5: r == s-1
     x = fastModularExponentation(a, int((2^(s-1))*d), n)
+    
     if x == -1 :
         return True
-    return False
+
+    return True
 
 def miller_rabin_3(n, k, rnd=default_pseudo_random):
     '''
