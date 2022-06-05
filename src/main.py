@@ -20,7 +20,7 @@ from Crypto.Util import number
 import gmpy2
 
 e = 65537   #fixed rsa exponent
-r_w = 32    #the RSA key length (bit-primes)
+r_w = 256    #the RSA key length (bit-primes)
 T = 300
 k = 128     #security parameter for: Golberg / pedersen / Dodis-Yampolsky
 
@@ -165,12 +165,11 @@ def user():
 
     if(pipe.pop()):
         lock_InformationPipe.release()
-        outputFile.close()
+
         return pkgvr_output(publicKeyRSA(p*q ,e), privateKeyRSA(p, q, e))
 
     lock_InformationPipe.release()    
-    raise_exception(Exception("golberg Proof: Not valid"))
-   
+    raise_exception(Exception("golberg Proof: Not valid"))   
 
 def ca():    
     lock_InformationPipe.acquire()
@@ -223,7 +222,7 @@ def ca():
 def raise_exception(e:Exception):
     print('Main has finished with errors '+str(e))
     writeOutputFile(str(e))
-    outputFile.close()
+   
     sys.exit()
 
 
@@ -231,9 +230,9 @@ def test_golberg():
     lock_InformationPipe.acquire()
     r_u = bytearray(mkNonce(),'ascii')
     s_prima = generate_hash(r_u)
-    p = number.getPrime(32, Random.new().read)
+    p = number.getPrime(r_w, Random.new().read)
     print("p = ",p)
-    q = number.getPrime(32, Random.new().read)
+    q = number.getPrime(r_w, Random.new().read)
     
     
     j = 2
@@ -244,7 +243,9 @@ def test_golberg():
 
     #HMAC(s',j+2,r_w)
     hmac= hmac_class()   
-    salt = univ.OctetString(univ.OctetString.fromHexString(hmac.hmac_method(r_w, s_prima, int.to_bytes(j+2, r_w,'big')).hex())) #Nist recommend salt string of at least 32 bit
+    result_hmac= hmac.hmac_method(r_w, s_prima, int.to_bytes(j+2, r_w,'big'))
+    aux = univ.OctetString.fromHexString(result_hmac.hex())
+    salt = univ.OctetString(aux) #Nist recommend salt string of at least 32 bit
     
     alpha = number.getPrime(8, Random.new().read) #alpha small prime α (about 16 bits long or less)
     golberg = golberg_et_al(salt, alpha, k, e, N.bit_length())
@@ -263,7 +264,7 @@ def test_golberg():
 
     if(pipe.pop()):
         lock_InformationPipe.release()
-        outputFile.close()
+        
         return pkgvr_output(publicKeyRSA(p*q ,e), privateKeyRSA(p, q, e))
 
     lock_InformationPipe.release()    
@@ -276,7 +277,7 @@ def test_golberg_ca():
 
     proof_w:golberg_output = pipe.pop()
     golberg:golberg_et_al = pipe.pop()
-    writeOutputFile('Proof from user: '+ proof_w)  
+    writeOutputFile('Proof received from user')  
     
     if golberg.verify(proof_w):
         
@@ -309,14 +310,12 @@ try:
     user_t = threading.Thread(name='USER Thread' , target = test_golberg)
     ca_t = threading.Thread(name='CA Thread' , target = test_golberg_ca)
 
-    user_t.start()
-    user_t.join()
-    time.sleep(1)
-
+    user_t.start()   
     ca_t.start()
 
+    user_t.join()
     outputFile.close()
-
+    
 except Exception as e:
     raise_exception(e)
 

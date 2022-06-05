@@ -11,6 +11,7 @@ from Crypto.Util.number import ceil_div
 from sieve_of_eratosthenes import sieve_of_eratosthenes
 import gmpy2
 from pkcs1 import primitives
+from Crypto.Util import number
 
 class golberg_output:
     firstTuple:AsnPubKey
@@ -53,7 +54,7 @@ class golberg_et_al:
 
             #Step 2
             N = p*q
-
+            
             #Step 3: get rsa key
             q_inv = int(gmpy2.invert(q, p))#qInv = (inverse of q) mod p
             d_np = int(gmpy2.invert(self.e, p-1)) #e^-1 mod p-1
@@ -70,7 +71,9 @@ class golberg_et_al:
             asnKRSA= AsnPubKey()
             asnKRSA.setComponentByName('modulus', N) 
             asnKRSA.setComponentByName('publicExponent', self.e)
-            for i in range(1,int(m2+1)):
+            result.firstTuple = asnKRSA
+
+            for i in range(1, m2+1):
                 p_i = self.getRho(asnKRSA, self.salt, i, self.len, m2)
                 if p_i not in range(0, N-1):
                     raise ValueError("Golberg: Message representative out of range")
@@ -111,7 +114,6 @@ class golberg_et_al:
             
             s = univ.OctetString(result_concat)
             ER = self.MGF1_SHA256(s, len)
-            p_i = self.OS2IP(ER)
             p_i= primitives.os2ip(ER.asOctets())
 
             #This step tests if p_i in Z_N
@@ -175,12 +177,12 @@ class golberg_et_al:
     def verify(self, info:golberg_output) -> bool:
         if info != NULL and info.firstTuple != NULL and info.firstTuple.getComponentByName('modulus') >= 2 ** (self.len - 1):
 
-            if millerRabin(self.e):
+            if number.isPrime(self.e):
                 #Set m1, m2
-                m1= int(abs( self.k / (log2(self.alpha)) ))
-                m2= int(abs( self.k / ( log2( (1/self.alpha) + (1/self.e) * (1 - (1 / self.alpha)) ) ) ))
+                m1 = math.ceil( self.k / (log2(self.alpha)) )
+                m2 = math.ceil( -self.k / ( log2( (1/self.alpha) + (1/self.e) * (1 - (1 / self.alpha)) ) ) )
 
-                if info.secondTuple!= NULL and info.secondTuple.count == m2:
+                if info.secondTuple!= NULL and len(info.secondTuple) == m2:
                     #Primes vector that included all primes numbers <= alpha-1
                     primes_vector = sieve_of_eratosthenes(self.alpha-1)
 
@@ -191,8 +193,8 @@ class golberg_et_al:
                         weird_key.setComponentByName('modulus', info.firstTuple.getComponentByName('modulus'))
                         weird_key.setComponentByName('publicExponent', self.e * info.firstTuple.getComponentByName('modulus'))
                         
-                        for i in range(0,m2):
-                            pi=self.getRho(info.firstTuple, self.salt, i+1, self.len, m2)
+                        for i in range(1, m2+1):
+                            pi = self.getRho(info.firstTuple, self.salt, i, self.len, m2)
                             
                             if i<=m1 and pi!=self.RSAVP1(weird_key, info.secondTuple[i]):
                                 #ρi = RSAVP1((N, eN), σi)
@@ -210,9 +212,13 @@ class golberg_et_al:
     # Output:
     #   m message representative, an integer between 0 and n - 1
     def RSAVP1(self, key:AsnPubKey, s:int)-> int:
-        if s<0 or s >  key.getComponentByName('modulus')-1:
+        #If the signature representative s is not between 0 and n - 1, output "signature representative out of range" and stop.
+        if s < 0 or s >= key.getComponentByName('modulus'):
             raise ValueError("signature representative out of range")
-        return (s**key.getComponentByName('publicExponent')) %  key.getComponentByName('modulus')
+        
+        #Step 2
+        m = fastModularExponentation(s, key.getComponentByName('publicExponent'), key.getComponentByName('modulus'))
+        return m
 
 
 #Input
