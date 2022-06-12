@@ -239,8 +239,6 @@ def test_golberg():
     N = p*q
     writeOutputFile('N has been established: ' + str(N)) 
 
-    #golberg  
-
     #HMAC(s',j+2,r_w)
     hmac= hmac_class()   
     result_hmac= hmac.hmac_method(r_w, s_prima, int.to_bytes(j+2, r_w,'big'))
