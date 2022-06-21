@@ -312,6 +312,7 @@ try:
     ca_t.start()
 
     user_t.join()
+    
     outputFile.close()
     
 except Exception as e:

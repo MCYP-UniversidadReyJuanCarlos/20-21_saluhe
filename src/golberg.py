@@ -2,7 +2,7 @@ from asyncio.windows_events import NULL
 from math import log2
 import math
 from pyasn1.type import univ
-from fastModularExp import fastModularExponentation
+from fastModularExp import fastModularExponentation, mymod
 from hashSha256 import generate_hash
 from millerRabin_primetest import millerRabin
 from rsa.asn1 import AsnPubKey
@@ -56,14 +56,14 @@ class golberg_et_al:
             N = p*q
             
             #Step 3: get rsa key
-            q_inv = int(gmpy2.invert(q, p))#qInv = (inverse of q) mod p
-            d_np = int(gmpy2.invert(self.e, p-1)) #e^-1 mod p-1
-            d_nq = int(gmpy2.invert(self.e, q-1)) #e^-1 mod q-1
-            k = golberg_key(p,q, d_np, d_nq, q_inv)
+            q_inv = gmpy2.invert(q, p) #qInv = (inverse of q) mod p
+            d_np = gmpy2.invert(self.e, p-1) #e^-1 mod p-1
+            d_nq = gmpy2.invert(self.e, q-1) #e^-1 mod q-1
+            k = golberg_key(p, q, d_np, d_nq, q_inv)
 
-            d_np_prima = int(gmpy2.invert(self.e*N, p-1)) #eN^-1 mod p-1
-            d_nq_prima = int(gmpy2.invert(self.e*N, q-1)) #eN^-1 mod q-1
-            k_prima = golberg_key(p,q, d_np_prima, d_nq_prima, q_inv)
+            d_np_prima = gmpy2.invert(self.e*N, p-1) #eN^-1 mod p-1
+            d_nq_prima = gmpy2.invert(self.e*N, q-1) #eN^-1 mod q-1
+            k_prima = golberg_key(p, q, d_np_prima, d_nq_prima, q_inv)
 
             #Step 5        
             i=1
@@ -93,23 +93,25 @@ class golberg_et_al:
         
         s_1 = fastModularExponentation(m, k.d_np, k.p)
         s_2 = fastModularExponentation(m, k.d_nq, k.q)
-        h = ((s_1 - s_2) * k.q_inv) % k.p
+        h = mymod((s_1 - s_2) * k.q_inv, k.p)
 
         return s_2 + k.q * h
 
     def getRho(self, asnPK:AsnPubKey, salt:univ.OctetString, i:int, len:int, m2:int) -> any :
         #Octet long of m2
         m2_long= abs(math.ceil( (1/8) * (log2(m2+1)) ))
-        #PK ASN.1 octet string encoding of the RSA public key (N, e)
+
+        # PK ASN.1 octet string encoding of the RSA public key (N, e)
         pk_encoded = encoder.encode(asnPK)
-        PK = univ.OctetString(univ.OctetString.fromHexString(pk_encoded.hex()))
+        # Returns DER encoded octet stream
+        PK = univ.OctetString(pk_encoded)
         
-        #EI= I2OSP(i, |m2|) be the |m2|-octet long string encoding of the integer i
+        # EI= I2OSP(i, |m2|) be the |m2|-octet long string encoding of the integer i
         EI = univ.OctetString(primitives.i2osp(i, m2_long))
 
         j=1
         while(True):
-            EJ = self.I2OSP(j, abs(math.ceil((1/8) * (log2(j+1)))))
+            EJ =  univ.OctetString(primitives.i2osp(j, abs(math.ceil((1/8) * (log2(j+1))))))
             result_concat = strFromOctetString(PK) + strFromOctetString(salt) + strFromOctetString(EI) + strFromOctetString(EJ)
             
             s = univ.OctetString(result_concat)
@@ -150,13 +152,12 @@ class golberg_et_al:
         if maskLen > (2**32) * hlen :
             raise ValueError("mask too long")
         T = str('')
-
+        
         long = ceil_div(maskLen, hlen)
         for counter in range(0, long):
-            C = self.I2OSP(counter, 4) # counter to octet string
+            C =  univ.OctetString(primitives.i2osp(counter, 4)) # counter to octet string
             concatOctetStr = strFromOctetString(mgfSeed) + strFromOctetString(C)
-            bytearrayFromOctet = bytearray(concatOctetStr, mgfSeed.encoding)
-            hashT = generate_hash(bytearrayFromOctet)
+            hashT = generate_hash(concatOctetStr.encode(mgfSeed.encoding))
             T += hashT.hex() #T = T || Hash(mgfSeed || C)
 
         return univ.OctetString(univ.OctetString.fromHexString(T))
@@ -191,15 +192,15 @@ class golberg_et_al:
 
                         weird_key = AsnPubKey()
                         weird_key.setComponentByName('modulus', info.firstTuple.getComponentByName('modulus'))
-                        weird_key.setComponentByName('publicExponent', self.e * info.firstTuple.getComponentByName('modulus'))
+                        weird_key.setComponentByName('publicExponent', info.firstTuple.getComponentByName('publicExponent') * info.firstTuple.getComponentByName('modulus'))
                         
                         for i in range(1, m2+1):
                             pi = self.getRho(info.firstTuple, self.salt, i, self.len, m2)
                             
-                            if i<=m1 and pi!=self.RSAVP1(weird_key, info.secondTuple[i]):
+                            if i <= m1 and pi != self.RSAVP1(weird_key, info.secondTuple[i-1]):
                                 #ρi = RSAVP1((N, eN), σi)
                                 return False                             
-                            elif pi!=self.RSAVP1(info.firstTuple, info.secondTuple[i]):
+                            elif pi != self.RSAVP1(info.firstTuple, info.secondTuple[i-1]):
                                 #ρi = RSAVP1(PK , σi)
                                 return False
                         return True                               
