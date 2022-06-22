@@ -1,6 +1,7 @@
 import math
 import gmpy2
 
+# A^B MOD C
 def fastModularExponentation(A:float, B:float, C:float):     
     if(B == -1):
         return gmpy2.invert(A, C)

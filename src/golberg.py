@@ -16,6 +16,7 @@ from Crypto.Util import number
 class golberg_output:
     firstTuple:AsnPubKey
     secondTuple=[]
+    pi_collection=[]
 
 class golberg_key:
     p:int
@@ -62,10 +63,9 @@ class golberg_et_al:
             k = golberg_key(p, q, d_np, d_nq, q_inv)
 
             d_np_prima = gmpy2.invert(self.e*N, p-1) #eN^-1 mod p-1
-            check_dnp = mymod(d_np_prima * self.e *N , p-1)
             d_nq_prima = gmpy2.invert(self.e*N, q-1) #eN^-1 mod q-1
             k_prima = golberg_key(p, q, d_np_prima, d_nq_prima, q_inv)
-
+            aux = self.e*N
             #Step 5        
             i=1
             result=golberg_output()
@@ -76,6 +76,7 @@ class golberg_et_al:
 
             for i in range(1, m2+1):
                 p_i = self.getRho(asnKRSA, self.salt, i, self.len, m2)
+                result.pi_collection.append(p_i)
                 if p_i not in range(0, N-1):
                     raise ValueError("Golberg: Message representative out of range")
                 if i <= m1:                
@@ -96,8 +97,7 @@ class golberg_et_al:
         s_2 = fastModularExponentation(m, k.d_nq, k.q)
         h = mymod((s_1 - s_2) * k.q_inv, k.p)
 
-        #return s_2 + k.q * h
-        return 
+        return s_2 + k.q * h
 
     def getRho(self, asnPK:AsnPubKey, salt:univ.OctetString, i:int, len:int, m2:int) -> any :
         #Octet long of m2
@@ -195,11 +195,11 @@ class golberg_et_al:
                         weird_key = AsnPubKey()
                         weird_key.setComponentByName('modulus', info.firstTuple.getComponentByName('modulus'))
                         weird_key.setComponentByName('publicExponent', info.firstTuple.getComponentByName('publicExponent') * info.firstTuple.getComponentByName('modulus'))
-                        
+
                         for i in range(1, m2+1):
                             pi = self.getRho(info.firstTuple, self.salt, i, self.len, m2)
                             
-                            if i <= m1 and pi != self.RSAVP1(weird_key, info.secondTuple[i-1]):
+                            if i <= m1 and pi != self.RSAVP1(weird_key, int(info.secondTuple[i-1])):
                                 #ρi = RSAVP1((N, eN), σi)
                                 return False                             
                             elif pi != self.RSAVP1(info.firstTuple, info.secondTuple[i-1]):
@@ -219,8 +219,8 @@ class golberg_et_al:
         if s < 0 or s >= key.getComponentByName('modulus'):
             raise ValueError("signature representative out of range")
         
-        #Step 2
-        m = fastModularExponentation(s, key.getComponentByName('publicExponent'), key.getComponentByName('modulus'))
+        # m = s^e mod n
+        m = fastModularExponentation(s, key.getComponentByName('publicExponent'), key.getComponentByName('modulus'))     
         return m
 
 
