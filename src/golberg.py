@@ -62,6 +62,7 @@ class golberg_et_al:
             k = golberg_key(p, q, d_np, d_nq, q_inv)
 
             d_np_prima = gmpy2.invert(self.e*N, p-1) #eN^-1 mod p-1
+            check_dnp = mymod(d_np_prima * self.e *N , p-1)
             d_nq_prima = gmpy2.invert(self.e*N, q-1) #eN^-1 mod q-1
             k_prima = golberg_key(p, q, d_np_prima, d_nq_prima, q_inv)
 
@@ -95,7 +96,8 @@ class golberg_et_al:
         s_2 = fastModularExponentation(m, k.d_nq, k.q)
         h = mymod((s_1 - s_2) * k.q_inv, k.p)
 
-        return s_2 + k.q * h
+        #return s_2 + k.q * h
+        return 
 
     def getRho(self, asnPK:AsnPubKey, salt:univ.OctetString, i:int, len:int, m2:int) -> any :
         #Octet long of m2

@@ -50,5 +50,6 @@ def millerRabin(e:int, p:int, a_random:int) -> bool:
     return (millerRabin_2(p, a_random)) and  math.gcd( e, p-1 ) == 1
 
 
-#print(millerRabin_2(13, random.randint(2, 13-2)))
+#primenumber = 953
+#print(millerRabin_2(primenumber, random.randint(2, primenumber-2)))
 
