@@ -1,36 +1,6 @@
 import math
 import gmpy2
 
-# A^B MOD C
-def fastModularExponentation(A:float, B:float, C:float):     
-    if(B == -1):
-        return gmpy2.invert(A, C)
-    binB= numtobin(B)    
-    Bdigits= len(binB) 
-    AtoBmodC=[None]*Bdigits
-    
-    power=1
-    product=0
-    for i in range(0, Bdigits):
-        if i == 0 :
-            AtoBmodC[0]= mymod(A,C)        
-        else:
-            AtoBmodC[i]= mymod(AtoBmodC[i-1]*AtoBmodC[i-1],C)        
-                 
-        if binB[Bdigits-1-i] == "1" :
-            if product == 0 :
-                product= AtoBmodC[i]
-            else:
-                product *= AtoBmodC[i]
-            
-            product = mymod(product,C)
-        
-        power *=2
-    
-    result = mymod(product,C) 
-    return result
-
-
 # converts a non-negative integer to 
 # binary represented by a string of 1s and 0s 
 def numtobin(num):
@@ -64,3 +34,19 @@ def mymod(A,B):
     # A mod B = R
     # R= A-B*Q, Q=floor(A/B)
     return A - math.floor(A // B)*B #  use // to get an integer back from the division of the two integers
+
+# A^B MOD C
+def fastModularExponentation(base:int, exponent:int, modulus:int) :
+    r = 1
+    b = mymod(base, modulus)
+    if b == 0 :
+        return 0
+    while exponent > 0:
+        #Odd number
+        if mymod(exponent, 2) != 0:
+            r = mymod((r * b), modulus)
+        exponent = exponent // 2
+        b = mymod((b ** 2), modulus)
+    
+    return r
+    

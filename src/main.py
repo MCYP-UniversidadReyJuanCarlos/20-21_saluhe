@@ -7,7 +7,7 @@ import threading
 from time import gmtime, strftime
 import time
 from golberg import golberg_et_al, golberg_output
-from models import pkgvr_output, privateKeyRSA, publicKeyRSA
+from models import privateKeyRSA, publicKeyRSA
 from hashSha256 import *
 from operator import xor
 from algorithm_2 import *
@@ -28,7 +28,7 @@ k = 128     #security parameter for: Golberg / pedersen / Dodis-Yampolsky
 # with the Dodis–Yampolskiy PRF uses l = 21535 + 554415 which is a Sophie Germain
 # prime, Λ = (4l + 18)l + 1 and r = 1572 · Λ + 1.
 
-def pkgvr() -> pkgvr_output:
+def pkgvr() -> any:
     r_u = bytearray(mkNonce(),'ascii')  
 
     r_u_aux= copy.copy(r_u)
@@ -78,7 +78,7 @@ def pkgvr() -> pkgvr_output:
         asnPK= AsnPubKey()
         asnPK.setComponentByName('modulus',N) 
         asnPK.setComponentByName('publicExponent', e)
-        return pkgvr_output(publicKeyRSA(N,e), privateKeyRSA(p,q,e))
+        return (publicKeyRSA(N,e), privateKeyRSA(p,q,e))
     raise_exception(Exception("golberg Proof: Not valid"))
 
 
@@ -166,7 +166,7 @@ def user():
     if(pipe.pop()):
         lock_InformationPipe.release()
 
-        return pkgvr_output(publicKeyRSA(p*q ,e), privateKeyRSA(p, q, e))
+        return (publicKeyRSA(p*q ,e), privateKeyRSA(p, q, e))
 
     lock_InformationPipe.release()    
     raise_exception(Exception("golberg Proof: Not valid"))   
@@ -230,11 +230,9 @@ def test_golberg():
     lock_InformationPipe.acquire()
     r_u = bytearray(mkNonce(),'ascii')
     s_prima = generate_hash(r_u)
-    p = number.getPrime(r_w, Random.new().read)
-    print("p = ",p)
+    p = number.getPrime(r_w, Random.new().read)    
     q = number.getPrime(r_w, Random.new().read)
-    
-    
+
     j = 2
     N = p*q
     writeOutputFile('N has been established: ' + str(N)) 
@@ -263,7 +261,7 @@ def test_golberg():
     if(pipe.pop()):
         lock_InformationPipe.release()
         
-        return pkgvr_output(publicKeyRSA(p*q ,e), privateKeyRSA(p, q, e))
+        return (publicKeyRSA(p*q ,e), privateKeyRSA(p, q, e))
 
     lock_InformationPipe.release()    
     raise_exception(Exception("golberg Proof: Not valid"))

@@ -56,16 +56,17 @@ class golberg_et_al:
             #Step 2
             N = p*q
             
-            #Step 3: get rsa key
-            q_inv = gmpy2.invert(q, p) #qInv = (inverse of q) mod p
-            d_np = gmpy2.invert(self.e, p-1) #e^-1 mod p-1
-            d_nq = gmpy2.invert(self.e, q-1) #e^-1 mod q-1
+            #Step 3: get rsa keys
+            q_inv = int(gmpy2.invert(q, p)) #qInv = (inverse of q) mod p
+            d_np = int(gmpy2.invert(self.e, p-1)) #e^-1 mod p-1
+            d_nq = int(gmpy2.invert(self.e, q-1)) #e^-1 mod q-1
             k = golberg_key(p, q, d_np, d_nq, q_inv)
 
-            d_np_prima = gmpy2.invert(self.e*N, p-1) #eN^-1 mod p-1
-            d_nq_prima = gmpy2.invert(self.e*N, q-1) #eN^-1 mod q-1
+            weirdKeyPublicExponent = self.e * N
+            d_np_prima = int(gmpy2.invert(weirdKeyPublicExponent, p-1)) #eN^-1 mod p-1
+            d_nq_prima = int(gmpy2.invert(weirdKeyPublicExponent, q-1)) #eN^-1 mod q-1
             k_prima = golberg_key(p, q, d_np_prima, d_nq_prima, q_inv)
-            aux = self.e*N
+            
             #Step 5        
             i=1
             result=golberg_output()
@@ -90,16 +91,16 @@ class golberg_et_al:
             raise e
 
     #  m = [0..n-1], output [0..n-1]
-    def RSASP1(self,k:golberg_key, m) -> any : 
+    def RSASP1(self,k:golberg_key, m) -> int : 
         #Second form of the key. Step 2      
         
         s_1 = fastModularExponentation(m, k.d_np, k.p)
         s_2 = fastModularExponentation(m, k.d_nq, k.q)
         h = mymod((s_1 - s_2) * k.q_inv, k.p)
 
-        return s_2 + k.q * h
+        return int(s_2 + k.q * h)
 
-    def getRho(self, asnPK:AsnPubKey, salt:univ.OctetString, i:int, len:int, m2:int) -> any :
+    def getRho(self, asnPK:AsnPubKey, salt:univ.OctetString, i:int, len:int, m2:int) -> int :
         #Octet long of m2
         m2_long= abs(math.ceil( (1/8) * (log2(m2+1)) ))
 
@@ -199,12 +200,14 @@ class golberg_et_al:
                         for i in range(1, m2+1):
                             pi = self.getRho(info.firstTuple, self.salt, i, self.len, m2)
                             
-                            if i <= m1 and pi != self.RSAVP1(weird_key, int(info.secondTuple[i-1])):
-                                #ρi = RSAVP1((N, eN), σi)
-                                return False                             
-                            elif pi != self.RSAVP1(info.firstTuple, info.secondTuple[i-1]):
-                                #ρi = RSAVP1(PK , σi)
-                                return False
+                            if i <= m1 :
+                                 #ρi = RSAVP1((N, eN), σi)
+                                if pi != self.RSAVP1(weird_key, info.secondTuple[i-1]):                                   
+                                    return False                                                              
+                            else:
+                                #ρi = RSAVP1(PK , σi) 
+                                if pi != self.RSAVP1(info.firstTuple, info.secondTuple[i-1]):                                                  
+                                    return False
                         return True                               
 
         return False
