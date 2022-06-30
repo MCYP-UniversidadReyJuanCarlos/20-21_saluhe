@@ -4,6 +4,8 @@ from Crypto.Random import random
 from Crypto import Random
 from Crypto.Util import number
 
+from fastModularExp import fastModularExponentation, mymod
+
 #security 1^k = 1024 bits
 class pedersen_commitment:
     g:any
@@ -57,16 +59,16 @@ class pedersen_commitment:
         return [q,g,h]
 
     def open(self, g, q, h, c, m, r):    
-        return c == (pow(g,m,q) * pow(h,r,q)) % q  
+        return c == mymod(fastModularExponentation(g,m,q) * fastModularExponentation(h,r,q), q)
 
     def open(self, c, m, r):    
-        return c == (pow(self.g,m,self.q) * pow(self.h,r,self.q)) % self.q  
+        return c == mymod(fastModularExponentation(self.g,m,self.q) * fastModularExponentation(self.h,r,self.q), self.q )
 
     def commitment(self,g,q,h, m: int, r:int) -> any:
         #g^m mod q
         #Opening received = r
-        return (pow(g,m,q) * pow(h,r,q)) % q
+        return mymod((fastModularExponentation(g,m,q) * fastModularExponentation(h,r,q)), q)
     
     def commitment(self, m: int, r:int) -> any:
         #Opening received = r
-        return (pow(self.g,m,self.q) * pow(self.h,r,self.q)) % self.q
+        return mymod(fastModularExponentation(self.g,m,self.q) * fastModularExponentation(self.h,r,self.q), self.q)

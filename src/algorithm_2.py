@@ -24,7 +24,7 @@ def algorithm_2(T:int, s:int, e:any, k:int, s_prima:bytearray, hmac:hmac_class, 
     j=0
     result:algorithm_2_output = algorithm_2_output()
 
-    #Setup dodis and yampolsky prf
+    # Setup dodis and yampolsky prf
     prf=dodis_yampolsky()
     prf.gen(k)
 
@@ -33,14 +33,15 @@ def algorithm_2(T:int, s:int, e:any, k:int, s_prima:bytearray, hmac:hmac_class, 
         aj = prf.sign_sk_provided(s,j)        
         result.a_collection.append(aj)
 
-        a_random = int.from_bytes(hmac.hmac_method(r_w, s_prima, int.to_bytes(j, r_w,'big')), 'big') #HMAC (1^rw, s',..)
-        #B-bit long. gcd(e,(p-1))=1
+        # HMAC (1^rw, s',..)
+        a_random = int.from_bytes(hmac.hmac_method(r_w, s_prima, int.to_bytes(j, r_w,'big')), 'big') 
+        # B-bit long. gcd(e,(p-1))=1
         if millerRabin(e, aj, a_random):
             if ctr==0 :
                 result.i=j
             ctr+=1  
 
-    #Not valid
+    # Not valid
     if ctr<2:
         result.i=-1
         return result

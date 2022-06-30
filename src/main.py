@@ -19,10 +19,10 @@ from Crypto import Random
 from Crypto.Util import number
 import gmpy2
 
-e = 65537   #fixed rsa exponent
-r_w = 256    #the RSA key length (bit-primes)
-T = 300
-k = 128     #security parameter for: Golberg / pedersen / Dodis-Yampolsky
+e = 65537   # fixed rsa exponent
+r_w = 256   # the RSA key length (bit-primes)
+T = 600
+k = 128     # security parameter for: Golberg / pedersen / Dodis-Yampolsky
 
 # To generate RSA moduli which are products of two (b(λ)-bit) 1536-bit primes, the instantiation
 # with the Dodis–Yampolskiy PRF uses l = 21535 + 554415 which is a Sophie Germain
@@ -111,7 +111,7 @@ def user():
     #pedersen_commitment(r_prima_u,p_u)
     r_prima_u_asInteger=int.from_bytes(r_prima_u,'big')
     p_u_asInteger=int.from_bytes(p_u,'big')
-    pedersen = pedersen_commitment()
+    pedersen = pedersen_commitment(r_w)
     c = pedersen.commitment(r_prima_u_asInteger,p_u_asInteger)
     writeOutputFile('Commitment has been computed by pedersens scheme: '+str(c))  
 
@@ -132,30 +132,37 @@ def user():
 
     #Algorithm 2
     hmac=hmac_class()
-    alg2_collection:algorithm_2_output=algorithm_2(T, s, e, r_w, s_prima, hmac)
+    alg2_collection:algorithm_2_output=algorithm_2(T, s, e, r_w, s_prima, hmac,r_w)
     if alg2_collection.i == -1 :
         raise_exception(Exception("Algorithm 2: Impossible to get a valid collection of primes"))
 
     #Set p, q and N
     p = alg2_collection.a_collection.pop(alg2_collection.i)
     writeOutputFile('Prime number p has been established: ' + str(p))  
-    j = alg2_collection.a_collection.count
+    j = len(alg2_collection.a_collection) - 1
     q = alg2_collection.a_collection.pop(j)
     writeOutputFile(' Prime number q has been established: ' + str(q))
     N = p*q
     writeOutputFile('N has been established: ' + str(N)) 
 
-    #golberg     
-    salt = univ.OctetString(os.urandom(32)) #Nist recommend salt string of at least 32 bit
-    #HMAC(s',j+2,r_w)
-    golberg = golberg_et_al(salt, s_prima, alg2_collection.a_collection.count + 2, e, r_w)
+
+    # HMAC(s',j+2,r_w)
+    hmac= hmac_class()   
+    result_hmac= hmac.hmac_method(r_w, s_prima, int.to_bytes(j+2, r_w,'big'))
+    aux = univ.OctetString.fromHexString(result_hmac.hex())
+    # Nist recommend salt string of at least 32 bit
+    salt = univ.OctetString(aux) 
+    
+    # alpha small prime  (about 16 bits long or less)
+    alpha = number.getPrime(8, Random.new().read)
+    
+    golberg = golberg_et_al(salt, alpha, k, e, N.bit_length())
     proof_w = golberg.prove(p,q)
     
-    pipe.append(q)
-    pipe.append(p)
-    pipe.append(alg2_collection.a_collection.count)
+    pipe.append(golberg)
     pipe.append(proof_w)
-    writeOutputFile('p, q, j and Proof sent to CA --------->')     
+	
+    writeOutputFile('Proof and systems parameter for Golberg proof sent to CA --------->')     
     writeOutputFile('')
     lock_InformationPipe.release()
     time.sleep(2)
@@ -169,13 +176,13 @@ def user():
         return (publicKeyRSA(p*q ,e), privateKeyRSA(p, q, e))
 
     lock_InformationPipe.release()    
-    raise_exception(Exception("golberg Proof: Not valid"))   
+    raise_exception(Exception("golberg Proof: Not valid"))    
 
 def ca():    
     lock_InformationPipe.acquire()
     c = pipe.pop()
     writeOutputFile('Commitment received from user: ' + str(c))
-
+	
     r_ca = bytearray(mkNonce(),'ascii') 
     writeOutputFile('r_ca has been established: '+ r_ca.hex()) 
 
@@ -189,29 +196,18 @@ def ca():
     #----------------------------> waiting proof, N, j
     lock_InformationPipe.acquire()
 
-    proof_w = pipe.pop()
-    writeOutputFile('Proof from user: '+ proof_w)  
-    j = pipe.pop()
-    writeOutputFile('j from user: ' + str(j))  
-    p = pipe.pop()
-    writeOutputFile('p from user: ' + str(p))
-    q = pipe.pop()
-    writeOutputFile('p from user: ' + str(q)) 
+    proof_w:golberg_output = pipe.pop()
+    golberg:golberg_et_al = pipe.pop()
+    writeOutputFile('Proof received from user')  
 
-    salt = univ.OctetString(os.urandom(32)) #Nist recommend salt string of at least 32 bit
-    golberg =  golberg_et_al()
-    if golberg.verify(salt, generate_hash(r_ca), j + 2, e, r_w, proof_w):
-        asnPK= AsnPubKey()
-        asnPK.setComponentByName('modulus', p*q) 
-        asnPK.setComponentByName('publicExponent', e)
-        
+    if golberg.verify(proof_w):        
         pipe.append(True)
         writeOutputFile('golberg Proof: valid.')
         writeOutputFile('OK sent to user --------->')
         lock_InformationPipe.release()
 
-        return asnPK
-    
+        return proof_w.firstTuple
+
     writeOutputFile('golberg Proof: Not valid. Error sent to user --------->')
     pipe.append(False)
     lock_InformationPipe.release()
@@ -303,14 +299,17 @@ try:
     outputFile.write('RSA Public-Key generation with verifiable randomness' + '\n')
     outputFile.write('User and CA threads have been created' + '\n')
 
-    user_t = threading.Thread(name='USER Thread' , target = test_golberg)
-    ca_t = threading.Thread(name='CA Thread' , target = test_golberg_ca)
+    user_t = threading.Thread(name='USER Thread' , target = user)
+    ca_t = threading.Thread(name='CA Thread' , target = ca)
+   
+    # These threads will end when main ends
+    user_t.daemon = True
+    ca_t.daemon = True
 
     user_t.start()   
     ca_t.start()
 
     user_t.join()
-    
     outputFile.close()
     
 except Exception as e:
