@@ -1,6 +1,4 @@
-
 from random import randint
-from Crypto.Random import random
 from Crypto import Random
 from Crypto.Util import number
 

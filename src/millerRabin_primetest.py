@@ -1,8 +1,4 @@
-import fractions
-from math import log2
 import math
-import random
-from pkcs1 import primes,primitives
 from fastModularExp import fastModularExponentation
 from pkcs1.defaults import default_pseudo_random, default_crypto_random
 

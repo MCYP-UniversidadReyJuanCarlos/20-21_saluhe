@@ -1,6 +1,5 @@
 from Crypto.Random import random
 from Crypto.Util import number
-from Crypto.Util.number import bytes_to_long
 
 from fastModularExp import fastModularExponentation
 

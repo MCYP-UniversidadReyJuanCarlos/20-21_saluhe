@@ -3,22 +3,21 @@ from dodis_yampolsky import dodis_yampolsky
 from hmac_c import hmac_class
 from millerRabin_primetest import millerRabin
 
-
 class algorithm_2_output:
     a_collection=[]
     i=0
     
-    #Input: 
-    #   T: number of iterations
-    #   s
-    #   e: fixed rsa exponent
-    #   k: security parameter
-    #   r_w: length bits
-    #   s_prima, r_w, hmac: params for random string HMAC(s', j, r_w)
+#Input: 
+#   T: number of iterations
+#   s
+#   e: fixed rsa exponent
+#   k: security parameter
+#   r_w: length bits
+#   s_prima, r_w, hmac: params for random string HMAC(s', j, r_w)
 
-    #Returns:
-    #   A collection of values returned by Dodis-Yampolsky function. 
-    #   First index inside the previous collection that is supposed to be prime
+#Returns:
+#   A collection of values returned by Dodis-Yampolsky function. 
+#   First index inside the previous collection that is supposed to be prime
 def algorithm_2(T:int, s:int, e:any, k:int, s_prima:bytearray, hmac:hmac_class, r_w) -> algorithm_2_output:
     ctr=0
     j=0

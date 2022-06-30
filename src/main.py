@@ -1,8 +1,6 @@
 #Public key generator with verifiable randomnes
 import copy
-import hmac
 import os
-import sys
 import threading
 from time import gmtime, strftime
 import time
@@ -18,7 +16,7 @@ from pyasn1.type import univ
 from rsa.asn1 import AsnPubKey
 from Crypto import Random
 from Crypto.Util import number
-import gmpy2
+
 
 e = 65537   # fixed rsa exponent
 r_w = 256   # the RSA key length (bit-primes)

@@ -1,8 +1,6 @@
 # key  clave
 # b block long 
 import hashlib
-from operator import xor
-from typing import Hashable
 from hashSha256 import generate_hash
 
 class hmac_class:
