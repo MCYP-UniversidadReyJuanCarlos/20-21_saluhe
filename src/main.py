@@ -6,6 +6,7 @@ import sys
 import threading
 from time import gmtime, strftime
 import time
+from exception_text_to_file import Fill_OutputFile
 from golberg import golberg_et_al, golberg_output
 from models import privateKeyRSA, publicKeyRSA
 from hashSha256 import *
@@ -60,7 +61,7 @@ def pkgvr() -> any:
     hmac=hmac_class()
     alg2_collection:algorithm_2_output=algorithm_2(T, s, e, k, s_prima, hmac, r_w)
     if alg2_collection.i == -1 :
-        raise_exception(Exception("Algorithm 2: Impossible to get a valid collection of primes"))
+        output_connection.raise_exception(Exception("Algorithm 2: Impossible to get a valid collection of primes"))
 
     #Set p, q and N
     p = alg2_collection.a_collection.pop(alg2_collection.i)
@@ -79,19 +80,13 @@ def pkgvr() -> any:
         asnPK.setComponentByName('modulus',N) 
         asnPK.setComponentByName('publicExponent', e)
         return (publicKeyRSA(N,e), privateKeyRSA(p,q,e))
-    raise_exception(Exception("golberg Proof: Not valid"))
-
-
-def writeOutputFile(s:str):
-    lock_OutputFile.acquire()    
-    outputFile.write(threading.current_thread().name+ ' ' + s + '\n')  
-    lock_OutputFile.release()
+    output_connection.raise_exception(Exception("golberg Proof: Not valid"))
 
 def user():
     lock_InformationPipe.acquire()
 
     r_u = bytearray(mkNonce(),'ascii')
-    writeOutputFile('r_u has been established: '+r_u.hex())  
+    output_connection.writeOutputFile('r_u has been established: '+r_u.hex())  
 
     r_u_aux= copy.copy(r_u)
     # r'u=hash(0||ru)
@@ -101,49 +96,49 @@ def user():
     r_u= copy.copy(r_u_aux)
     r_u_aux[0:0] = int.to_bytes(1, 2, 'big')
     p_u = generate_hash(r_u_aux)
-    writeOutputFile('p_u has been established: '+p_u.hex())  
+    output_connection.writeOutputFile('p_u has been established: '+p_u.hex())  
 
     r_u_aux= copy.copy(r_u)
     r_u[0:0] =int.to_bytes(2, 2, 'big')
     s_prima = generate_hash(r_u)
-    writeOutputFile('Seed s_prima has been established: '+s_prima.hex())  
+    output_connection.writeOutputFile('Seed s_prima has been established: '+s_prima.hex())  
 
     #pedersen_commitment(r_prima_u,p_u)
     r_prima_u_asInteger=int.from_bytes(r_prima_u,'big')
     p_u_asInteger=int.from_bytes(p_u,'big')
     pedersen = pedersen_commitment(r_w)
     c = pedersen.commitment(r_prima_u_asInteger,p_u_asInteger)
-    writeOutputFile('Commitment has been computed by pedersens scheme: '+str(c))  
+    output_connection.writeOutputFile('Commitment has been computed by pedersens scheme: '+str(c))  
 
     #----------------------------> send commitment to CA
     pipe.append(c)
-    writeOutputFile('Commitment sent to CA --------->')  
-    writeOutputFile('')
+    output_connection.writeOutputFile('Commitment sent to CA --------->')  
+    output_connection.writeOutputFile('')
     lock_InformationPipe.release()
     time.sleep(2)
 
     #----------------------------> waiting r_ca
     lock_InformationPipe.acquire() 
     r_ca = pipe.pop()
-    writeOutputFile('r_ca received from CA: '+r_ca.hex())
+    output_connection.writeOutputFile('r_ca received from CA: '+r_ca.hex())
 
     s = xor(r_prima_u_asInteger, int.from_bytes(generate_hash(r_ca),'big'))
-    writeOutputFile('Seed s has been established: ' + str(s))  
+    output_connection.writeOutputFile('Seed s has been established: ' + str(s))  
 
     #Algorithm 2
     hmac=hmac_class()
     alg2_collection:algorithm_2_output=algorithm_2(T, s, e, r_w, s_prima, hmac,r_w)
     if alg2_collection.i == -1 :
-        raise_exception(Exception("Algorithm 2: Impossible to get a valid collection of primes"))
+        output_connection.raise_exception(Exception("Algorithm 2: Impossible to get a valid collection of primes"))
 
     #Set p, q and N
-    p = alg2_collection.a_collection.pop(alg2_collection.i)
-    writeOutputFile('Prime number p has been established: ' + str(p))  
+    p = alg2_collection.a_collection.pop(alg2_collection.i - 1)
+    output_connection.writeOutputFile('Prime number p has been established: ' + str(p))  
     j = len(alg2_collection.a_collection) - 1
     q = alg2_collection.a_collection.pop(j)
-    writeOutputFile(' Prime number q has been established: ' + str(q))
+    output_connection.writeOutputFile(' Prime number q has been established: ' + str(q))
     N = p*q
-    writeOutputFile('N has been established: ' + str(N)) 
+    output_connection.writeOutputFile('N has been established: ' + str(N)) 
 
 
     # HMAC(s',j+2,r_w)
@@ -162,13 +157,13 @@ def user():
     pipe.append(golberg)
     pipe.append(proof_w)
 	
-    writeOutputFile('Proof and systems parameter for Golberg proof sent to CA --------->')     
-    writeOutputFile('')
+    output_connection.writeOutputFile('Proof and systems parameter for Golberg proof sent to CA --------->')     
+    output_connection.writeOutputFile('')
     lock_InformationPipe.release()
     time.sleep(2)
 
     lock_InformationPipe.acquire()
-    writeOutputFile('Proof verified from CA') 
+    output_connection.writeOutputFile('Proof verified from CA') 
 
     if(pipe.pop()):
         lock_InformationPipe.release()
@@ -176,20 +171,20 @@ def user():
         return (publicKeyRSA(p*q ,e), privateKeyRSA(p, q, e))
 
     lock_InformationPipe.release()    
-    raise_exception(Exception("golberg Proof: Not valid"))    
+    output_connection.raise_exception(Exception("golberg Proof: Not valid"))    
 
 def ca():    
     lock_InformationPipe.acquire()
     c = pipe.pop()
-    writeOutputFile('Commitment received from user: ' + str(c))
+    output_connection.writeOutputFile('Commitment received from user: ' + str(c))
 	
     r_ca = bytearray(mkNonce(),'ascii') 
-    writeOutputFile('r_ca has been established: '+ r_ca.hex()) 
+    output_connection.writeOutputFile('r_ca has been established: '+ r_ca.hex()) 
 
     #----------------------------> send r_ca to user
     pipe.append(r_ca)
-    writeOutputFile('r_ca sent to user --------->')
-    writeOutputFile('')
+    output_connection.writeOutputFile('r_ca sent to user --------->')
+    output_connection.writeOutputFile('')
     lock_InformationPipe.release()
     time.sleep(3)
 
@@ -198,29 +193,22 @@ def ca():
 
     proof_w:golberg_output = pipe.pop()
     golberg:golberg_et_al = pipe.pop()
-    writeOutputFile('Proof received from user')  
+    output_connection.writeOutputFile('Proof received from user')  
 
     if golberg.verify(proof_w):        
         pipe.append(True)
-        writeOutputFile('golberg Proof: valid.')
-        writeOutputFile('OK sent to user --------->')
+        output_connection.writeOutputFile('golberg Proof: valid.')
+        output_connection.writeOutputFile('OK sent to user --------->')
         lock_InformationPipe.release()
 
         return proof_w.firstTuple
 
-    writeOutputFile('golberg Proof: Not valid. Error sent to user --------->')
+    output_connection.writeOutputFile('golberg Proof: Not valid. Error sent to user --------->')
     pipe.append(False)
     lock_InformationPipe.release()
 
-    raise_exception(Exception("golberg Proof: Not valid"))
-        
-
-def raise_exception(e:Exception):
-    print('Main has finished with errors '+str(e))
-    writeOutputFile(str(e))
-   
-    sys.exit()
-
+    output_connection.raise_exception(Exception("golberg Proof: Not valid"))
+       
 
 def test_golberg():    
     lock_InformationPipe.acquire()
@@ -231,7 +219,7 @@ def test_golberg():
 
     j = 2
     N = p*q
-    writeOutputFile('N has been established: ' + str(N)) 
+    output_connection.writeOutputFile('N has been established: ' + str(N)) 
 
     #HMAC(s',j+2,r_w)
     hmac= hmac_class()   
@@ -246,13 +234,13 @@ def test_golberg():
     pipe.append(golberg)
     pipe.append(proof_w)
 
-    writeOutputFile('Proof and systems parameter for Golberg proof sent to CA --------->')     
-    writeOutputFile('')
+    output_connection.writeOutputFile('Proof and systems parameter for Golberg proof sent to CA --------->')     
+    output_connection.writeOutputFile('')
     lock_InformationPipe.release()
     time.sleep(2)
 
     lock_InformationPipe.acquire()
-    writeOutputFile('Proof verified from CA') 
+    output_connection.writeOutputFile('Proof verified from CA') 
 
     if(pipe.pop()):
         lock_InformationPipe.release()
@@ -260,7 +248,7 @@ def test_golberg():
         return (publicKeyRSA(p*q ,e), privateKeyRSA(p, q, e))
 
     lock_InformationPipe.release()    
-    raise_exception(Exception("golberg Proof: Not valid"))
+    output_connection.raise_exception(Exception("golberg Proof: Not valid"))
 
 
 def test_golberg_ca():
@@ -269,22 +257,22 @@ def test_golberg_ca():
 
     proof_w:golberg_output = pipe.pop()
     golberg:golberg_et_al = pipe.pop()
-    writeOutputFile('Proof received from user')  
+    output_connection.writeOutputFile('Proof received from user')  
     
     if golberg.verify(proof_w):
         
         pipe.append(True)
-        writeOutputFile('golberg Proof: valid.')
-        writeOutputFile('OK sent to user --------->')
+        output_connection.writeOutputFile('golberg Proof: valid.')
+        output_connection.writeOutputFile('OK sent to user --------->')
         lock_InformationPipe.release()
 
         return proof_w.firstTuple
     
-    writeOutputFile('golberg Proof: Not valid. Error sent to user --------->')
+    output_connection.writeOutputFile('golberg Proof: Not valid. Error sent to user --------->')
     pipe.append(False)
     lock_InformationPipe.release()
 
-    raise_exception(Exception("golberg Proof: Not valid"))
+    output_connection.raise_exception(Exception("golberg Proof: Not valid"))
 
 #Threads
 try:
@@ -296,6 +284,7 @@ try:
     outputFilePath='Output_'+strftime('%Y-%m-%dT%H%M%SZ', gmtime())+'.txt'
 
     outputFile = open (outputFilePath,'a')
+    output_connection = Fill_OutputFile(outputFile)
     outputFile.write('RSA Public-Key generation with verifiable randomness' + '\n')
     outputFile.write('User and CA threads have been created' + '\n')
 
@@ -313,7 +302,7 @@ try:
     outputFile.close()
     
 except Exception as e:
-    raise_exception(e)
+    output_connection.raise_exception(e)
 
 
 

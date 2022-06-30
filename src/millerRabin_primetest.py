@@ -19,6 +19,10 @@ def millerRabin_2(n:int, a:int) -> bool :
         d //= 2
         s += 1
     
+    # If s=1 then end the algorithm with message n is definitely not prime"
+    if(s == 1):
+        return False
+
     # Step 2
     # If X ≡ ±1(modn) Then end the algorithm with message "n is probably prime"
     x = fastModularExponentation(a, d, n)
