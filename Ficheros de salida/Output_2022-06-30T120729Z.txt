@@ -1,0 +1,23 @@
+RSA Public-Key generation with verifiable randomness
+User and CA threads have been created
+USER Thread r_u has been established: 323032322d30362d33305431323a30373a33345a487272773655
+USER Thread p_u has been established: c865111de292bda2f1b74e49fff78335eee11de016c4cd83b6a501f8dba8c8ec
+USER Thread Seed s_prima has been established: 8f1dae1b02144e003e1798e38f54610387510556459d0a0c62e10b534ddbd081
+USER Thread Commitment has been computed by pedersens scheme: 1721363257444770499974912367718090240851843006104511645286301732690858349365701
+USER Thread Commitment sent to CA --------->
+USER Thread 
+CA Thread Commitment received from user: 1721363257444770499974912367718090240851843006104511645286301732690858349365701
+CA Thread r_ca has been established: 323032322d30362d33305431323a30373a33365a724d497a644a
+CA Thread r_ca sent to user --------->
+CA Thread 
+USER Thread r_ca received from CA: 323032322d30362d33305431323a30373a33365a724d497a644a
+USER Thread Seed s has been established: 64211590748957667622740962689741848298084873358204325432280394411470191190354
+USER Thread Prime number p has been established: 855312858300560797316980569282320991541910086285228691394512764781356866082481
+USER Thread  Prime number q has been established: 104386238671512930570890030781208611515243232429738006879948854232456223676881
+USER Thread N has been established: 89282892165376258954574080798712282088559219021935320083278052103032937554256339272134272335139302178669537408176187288645873433367458069393956600038821761
+USER Thread Proof and systems parameter for Golberg proof sent to CA --------->
+USER Thread 
+CA Thread Proof received from user
+CA Thread golberg Proof: valid.
+CA Thread OK sent to user --------->
+USER Thread Proof verified from CA
