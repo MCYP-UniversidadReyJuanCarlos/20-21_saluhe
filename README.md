@@ -1,4 +1,27 @@
-# 20-21_saluhe
+# Key generation with verifiable randomness 
+Project description
+
+## Index:
+> - [Features](#features)
+> - [How to run](#how-to-run)
+> - [Basic usage](#basic-usage)
+> - [Development documentation](#development-documentation)
+> - [Architecture](#architecture)
+> - [Prepare development and execution environment](#prepare-development-and-execution-environment)
+
+### Features
+
+### How to run
+
+### Basic usage
+
+### Development documentation
+
+### Architecture
+
+### Prepare development and execution environment
+
+
 Tecnologías empleadas en el protocolo implementado son las siguientes:<br>
 > - Pedersen Committment como esquema de compromiso  
 > - Miller Rabin como test de primalidad
