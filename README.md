@@ -85,17 +85,18 @@ El esquema del protocolo es el siguiente:
   
   #### Miller Rabin Prime Test
   
-    Input : n (n is the number to be tested for primality) 
-    <br>
-    Output : whether n is prime or not
+Input : n (n is the number to be tested for primality) 
+<br>
+Output : whether n is prime or not
+<br>
 
-    <table>
-    <tr>
-      <td>
-        <img src="https://latex.codecogs.com/svg.image?\\\textit{n-1&space;=&space;2}^{s}d\textit{&space;&space;d}&space;\epsilon&space;N,&space;\textit{&space;&space;s}\epsilon&space;N\\\textit{Choose&space;a&space;random&space;integer&space;a&space;where&space;}2\leq&space;a\leq&space;n-2\\\\X\equiv&space;a^{d}(modn)\\&space;\textit{If&space;X}\equiv\pm&space;1(modn)\\\indent&space;\textit{return&space;'n&space;is&space;probably&space;prime'}\\\textit{If&space;s=1}\equiv\pm&space;1(modn)\\\indent&space;\textit{return&space;'n&space;is&space;de&space;finitely&space;not&space;prime'}\\&space;\\r=1\\\\\textbf{Step&space;3}\\&space;X\equiv&space;a^{2^{r}d}(modn)\\&space;\textit{If&space;X}\equiv&space;1(modn)\\\indent&space;\textit{return&space;'n&space;is&space;de&space;finitely&space;not&space;prime'}\\\textit{If&space;X}\equiv&space;-1(modn)\\\indent&space;\textit{return&space;'n&space;is&space;probably&space;prime'}\\&space;r=r&plus;1\\\textit{If&space;r&space;!=&space;s-1}\\\indent&space;\textit{then&space;go&space;to&space;Step&space;3}\\\\X\equiv&space;a^{2^{s-1}d}(modn)\\&space;\textit{If&space;X}\not\equiv&space;&space;-1(modn)\\\indent&space;\textit{return&space;'n&space;is&space;de&space;finitely&space;not&space;prime'}\\\textit{If&space;X}\equiv&space;-1(modn)\\\indent&space;\textit{return&space;'n&space;is&space;probably&space;prime'}&space;" />
-     </td>
-    </tr>
-    </table>
+  <table>
+  <tr>
+    <td>
+      <img src="https://latex.codecogs.com/svg.image?\\\textit{n-1&space;=&space;2}^{s}d\textit{&space;&space;d}&space;\epsilon&space;N,&space;\textit{&space;&space;s}\epsilon&space;N\\\textit{Choose&space;a&space;random&space;integer&space;a&space;where&space;}2\leq&space;a\leq&space;n-2\\\\X\equiv&space;a^{d}(modn)\\&space;\textit{If&space;X}\equiv\pm&space;1(modn)\\\indent&space;\textit{return&space;'n&space;is&space;probably&space;prime'}\\\textit{If&space;s=1}\equiv\pm&space;1(modn)\\\indent&space;\textit{return&space;'n&space;is&space;de&space;finitely&space;not&space;prime'}\\&space;\\r=1\\\\\textbf{Step&space;3}\\&space;X\equiv&space;a^{2^{r}d}(modn)\\&space;\textit{If&space;X}\equiv&space;1(modn)\\\indent&space;\textit{return&space;'n&space;is&space;de&space;finitely&space;not&space;prime'}\\\textit{If&space;X}\equiv&space;-1(modn)\\\indent&space;\textit{return&space;'n&space;is&space;probably&space;prime'}\\&space;r=r&plus;1\\\textit{If&space;r&space;!=&space;s-1}\\\indent&space;\textit{then&space;go&space;to&space;Step&space;3}\\\\X\equiv&space;a^{2^{s-1}d}(modn)\\&space;\textit{If&space;X}\not\equiv&space;&space;-1(modn)\\\indent&space;\textit{return&space;'n&space;is&space;de&space;finitely&space;not&space;prime'}\\\textit{If&space;X}\equiv&space;-1(modn)\\\indent&space;\textit{return&space;'n&space;is&space;probably&space;prime'}&space;" />
+   </td>
+  </tr>
+  </table>
   
   
   #### NIZK Golberg et al
@@ -107,17 +108,18 @@ El esquema del protocolo es el siguiente:
   
   
   #### Algoritmo 2  
-    Necesita PrimeTestW, enteros T; b; e, Dodis-Yampolsky PRF, seed s. 
-    <br>
-    Devuelve una coleccion de numeros pseudo-aleatorios a y el entero i. Este entero i apunta al primer numero primo de la coleccion y el segundo numero primo esta en  la ultima posicion de esta coleccion devuelta. En caso de no encontrar 2 numeros primos, i vale -1.
+Necesita PrimeTestW, enteros T; b; e, Dodis-Yampolsky PRF, seed s. 
+<br>
+Devuelve una coleccion de numeros pseudo-aleatorios a y el entero i. Este entero i apunta al primer numero primo de la coleccion y el segundo numero primo esta en  la ultima posicion de esta coleccion devuelta. En caso de no encontrar 2 numeros primos, i vale -1.
+<br>
   
-    <table>
-      <tr>
-        <td>
-          <img src="https://latex.codecogs.com/svg.image?\\&space;\textit{ctr,i,j&space;}\leftarrow&space;0&space;\\\\\textit{while&space;ctr&space;}<&space;2\textit{&space;and&space;j&space;}<\textit{T&space;do}\\\indent&space;\textit{j&space;}\leftarrow&space;\textit{j&plus;1}&space;\\\indent&space;a_{j}\leftarrow&space;\textit{Dodis-Yampolsky(s,j)}&space;\\\\\indent&space;\textit{if&space;PrimeTest}_{W}\textit{&space;(b,e,a}_{j}\textit{)&space;then}&space;\\\indent&space;\indent&space;\textit{if&space;ctr&space;=&space;0&space;then}\\\indent&space;\indent&space;\indent&space;\textit{i}\leftarrow&space;j&space;&space;\\\indent&space;\indent&space;\textit{endif}\\\indent&space;\indent&space;\textit{ctr}\leftarrow&space;ctr&plus;1&space;&space;\\\indent&space;\textit{endif}\\\\\textit{if&space;ctr}<2&space;\textit{&space;then}\\\indent&space;\textit{return&space;}\left&space;(&space;(a_{\gamma})_{\gamma&space;=&space;1}^{j},&space;\textit{-1}&space;\right&space;)&space;\\\textit{else}\\\indent&space;\textit{return&space;}\left&space;(&space;(a_{\gamma})_{\gamma&space;=&space;1}^{j},&space;i&space;\right&space;)&space;\\&space;\textit{endif}&space;" />
-        </td>
-      </tr>
-     </table>  
+<table>
+  <tr>
+    <td>
+      <img src="https://latex.codecogs.com/svg.image?\\&space;\textit{ctr,i,j&space;}\leftarrow&space;0&space;\\\\\textit{while&space;ctr&space;}<&space;2\textit{&space;and&space;j&space;}<\textit{T&space;do}\\\indent&space;\textit{j&space;}\leftarrow&space;\textit{j&plus;1}&space;\\\indent&space;a_{j}\leftarrow&space;\textit{Dodis-Yampolsky(s,j)}&space;\\\\\indent&space;\textit{if&space;PrimeTest}_{W}\textit{&space;(b,e,a}_{j}\textit{)&space;then}&space;\\\indent&space;\indent&space;\textit{if&space;ctr&space;=&space;0&space;then}\\\indent&space;\indent&space;\indent&space;\textit{i}\leftarrow&space;j&space;&space;\\\indent&space;\indent&space;\textit{endif}\\\indent&space;\indent&space;\textit{ctr}\leftarrow&space;ctr&plus;1&space;&space;\\\indent&space;\textit{endif}\\\\\textit{if&space;ctr}<2&space;\textit{&space;then}\\\indent&space;\textit{return&space;}\left&space;(&space;(a_{\gamma})_{\gamma&space;=&space;1}^{j},&space;\textit{-1}&space;\right&space;)&space;\\\textit{else}\\\indent&space;\textit{return&space;}\left&space;(&space;(a_{\gamma})_{\gamma&space;=&space;1}^{j},&space;i&space;\right&space;)&space;\\&space;\textit{endif}&space;" />
+    </td>
+  </tr>
+ </table>  
       
 
 ### Arquitectura
