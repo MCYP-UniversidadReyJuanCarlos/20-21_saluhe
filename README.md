@@ -81,6 +81,49 @@ El esquema del protocolo es el siguiente:
   
   #### PRF HMAC
   
+  Dada una entrada 'text':
+  <table> 
+   <tr>
+      <th>Pasos</th>
+      <th>Descripcion de los pasos</th>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>Si la longitud de K=B, entonces K0= K. Salto al paso 4<td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Si la longitud de K>B, calculo el hash de K para obtener un string de L Bytes, despues añade al final (B-L) ceros para crear un string de B-Bytes K0. Es decir, K0 = H(K) || 00...00. Salto al paso 4</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Si la longitud de K<B, añade B-K ceros para crear un string K0 de longitud B-Bytes. Es decir, si la longitud de K es 20 bytes y la longitud de B es 64 bytes, entonces se añadiran 44 bytes cero x’00’ para formar K0</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>K0 ⊕ ipad</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Añadir el parametro de entrada text: (K0 ⊕ ipad) || text </td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>Se aplica la funcion hash a la salida del paso 5: H((K0 ⊕ ipad) || text) </td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>K0 ⊕ opad</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>Se añade el resultado del paso 7 al resultado del paso 6: (K0 ⊕ opad) || H((K0 ⊕ ipad) || text)</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>Se aplica el hash al resultado del paso 8: H((K0 ⊕ opad )|| H((K0 ⊕ ipad) || text))</td>
+    </tr>
+  </table> 
   
   
   #### Miller Rabin Prime Test
