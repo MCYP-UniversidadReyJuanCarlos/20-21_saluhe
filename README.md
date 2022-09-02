@@ -1,9 +1,9 @@
 # GENERACIÓN VERIFICABLE DE CLAVES CRIPTOGRÁFICAS
 Los protocolos criptográficos se diseñan comúnmente bajo el supuesto de que las diferentes partes de este tienen acceso a la aleatoriedad perfecta (es decir, uniforme). Sin embargo, las fuentes aleatorias utilizadas en implementaciones prácticas rara vez cumplen con esta suposición y proporcionan solo un flujo de bits con un cierto "nivel de aleatoriedad". La calidad de los números aleatorios determina directamente la solidez de la seguridad de los sistemas que los utilizan.
 
-Cuando la generación de claves criptográficas (por ejemplo, para firma digital) se hace maliciosamente, es posible “sustituir” valores presumiblemente elegidos al azar por otros, con distintos fines (vulnerar la seguridad de la firma, insertar canales encubiertos de comunicación.). En consecuencia, en este proyecto se lleva a cabo una implementación de un esquema RSA con aleatoriedad verificable, documentada por el protocolo genérico de claves descrito por Blazy et al.
+Cuando la generación de claves criptográficas (por ejemplo, para firma digital) se hace maliciosamente, es posible “sustituir” valores presumiblemente elegidos al azar por otros, con distintos fines (vulnerar la seguridad de la firma, insertar canales encubiertos de comunicación.). En consecuencia, en este proyecto se lleva a cabo una implementación de un esquema RSA con aleatoriedad verificable, documentada por el protocolo genérico de claves descrito por [Blazy et al](https://eprint.iacr.org/2020/294.pdf).
 
-## Index
+## Indice
 > - [Características](#características)
 > - [Como ejecutar](#como-ejecutar)
 > - [Uso básico](#uso-básico)
@@ -13,13 +13,13 @@ Cuando la generación de claves criptográficas (por ejemplo, para firma digital
 > - [Bibliografía](#bibliografía)
 
 ### Características
-Proyecto desarrollado en lenguaje Python, concretamente en la version .
+Proyecto desarrollado en lenguaje Python, concretamente en la version Python 3.10.4.
 
 ### Como ejecutar
-Para la ejecucion del proyecto:
+Ejecutar el archivo ejecutable **dist/20-21_saluhe.exe** disponible en este proyecto. La ejecucion del mismo generara, en esa misma carpeta, un fichero de salida.
 
 ### Uso básico
-Obtencion de colecciones de primos generados con cierta aleatoriedad verificable
+Obtencion de colecciones de primos generados con cierta aleatoriedad verificable.
 
 ### Documentación de desarrollo
 En esta seccion se proporciona el esquema del protocolo asi como el listado de las diversas tecnologías empleadas en el mismo.
@@ -168,7 +168,7 @@ Devuelve una coleccion de numeros pseudo-aleatorios a y el entero i. Este entero
 ### Arquitectura
 
 #### Arquitectura del codigo
-
+  
 
 #### Estructura del proyecto
 
@@ -216,6 +216,10 @@ Devuelve una coleccion de numeros pseudo-aleatorios a y el entero i. Este entero
     - **gmpy2**     py -m pip install gmpy2
     - **pkcs1**     py -m pip install pkcs1
 * **Al instalar las librerias es posible que necesite cerrar y volver a abrir el IDE para que el error de falta de dependencias desaparezca**
+
+Para la creacion del fichero exe con todas las dependencias:
+* **python -O -m PyInstaller -F <ruta-del-proyecto>\src\main.py -n <nombre-del-ejecutable-final>**
+* La opcion -F del comando se usa para la encapsulacion de las dependencias en un solo fichero ejecutable.
 
 ### Bibliografía
 
