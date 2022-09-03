@@ -168,7 +168,7 @@ Devuelve una coleccion de numeros pseudo-aleatorios a y el entero i. Este entero
 ### Arquitectura
 
 #### Arquitectura del codigo
-  
+<img src="https://github.com/MCYP-UniversidadReyJuanCarlos/20-21_saluhe/blob/main/Arq.svg" />
 
 #### Estructura del proyecto
 
