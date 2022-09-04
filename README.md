@@ -75,9 +75,9 @@ El esquema del protocolo es el siguiente:
     </table> 
     
     
-  #### PRF Dodis Yampolsky
-  
-  
+   #### PRF Dodis Yampolsky
+  <img src="https://latex.codecogs.com/svg.image?\\\left\{1...d&space;\right\}\textit{&space;d}\epsilon\mathbb{N}&space;\textit{&space;}\overset{f}{\rightarrow}&space;\textit{z&space;}\epsilon&space;\textit{G&space;de&space;orden&space;primo&space;t,&space;con&space;generador&space;g}\\\textit{Siendo&space;x}\epsilon&space;Z_{t}^{*}\textit{&space;la&space;clave&space;secreta}\\&space;f\equiv&space;V_{x}:\left\{1...d&space;\right\}\rightarrow&space;G\\&space;\textit{Siendo&space;el&space;mensaje&space;m:&space;}&space;V_{x}(m)=g^{\frac{1}{x&plus;m}}&space;\textit{&space;donde&space;x&plus;m}\neq&space;0&space;\textit{&space;modt&space;y&space;}1_{G}\textit{&space;en&space;otro&space;caso}" title="https://latex.codecogs.com/svg.image?\\\left\{1...d \right\}\textit{ d}\epsilon\mathbb{N} \textit{ }\overset{f}{\rightarrow} \textit{z }\epsilon \textit{G de orden primo t, con generador g}\\\textit{Siendo x}\epsilon Z_{t}^{*}\textit{ la clave secreta}\\ f\equiv V_{x}:\left\{1...d \right\}\rightarrow G\\ \textit{Siendo el mensaje m: } V_{x}(m)=g^{\frac{1}{x+m}} \textit{ donde x+m}\neq 0 \textit{ modt y }1_{G}\textit{ en otro caso}" />
+    
   
   #### PRF HMAC
   
