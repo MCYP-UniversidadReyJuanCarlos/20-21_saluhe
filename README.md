@@ -97,7 +97,7 @@ El esquema del protocolo es el siguiente:
     </tr>
     <tr>
       <td>3</td>
-      <td>Si la longitud de K<B, añade B-K ceros para crear un string K0 de longitud B-Bytes. Es decir, si la longitud de K es 20 bytes y la longitud de B es 64 bytes, entonces se añadiran 44 bytes cero x’00’ para formar K0</td>
+      <td>Si la longitud de K es menor que B, añade B-K ceros para crear un string K0 de longitud B-Bytes. Es decir, si la longitud de K es 20 bytes y la longitud de B es 64 bytes, entonces se añadiran 44 bytes cero x’00’ para formar K0</td>
     </tr>
     <tr>
       <td>4</td>
