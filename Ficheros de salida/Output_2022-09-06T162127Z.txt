@@ -1,0 +1,15 @@
+RSA Public-Key generation with verifiable randomness
+User and CA threads have been created
+USER Thread r_u has been established: 323032322d30392d30365431363a32313a32375a754b4d43776b
+USER Thread p_u has been established: c0fe340f7cc0d146f20b15835b88d513c60cb98b7ac15f90b2e073424b164b71
+USER Thread Seed s_prima has been established: 03ef00c598a5755b013f04a4b66d0736f424582c86463c8ecbd7eb746001e4de
+USER Thread Commitment has been computed by pedersens scheme: 598361438283599761118505907996518505613156735071877743785623746813694981919983
+USER Thread Commitment sent to CA --------->
+USER Thread 
+CA Thread Commitment received from user: 598361438283599761118505907996518505613156735071877743785623746813694981919983
+CA Thread r_ca has been established: 323032322d30392d30365431363a32313a32395a626635747061
+CA Thread r_ca sent to user --------->
+CA Thread 
+USER Thread r_ca received from CA: 323032322d30392d30365431363a32313a32395a626635747061
+USER Thread Seed s has been established: 74152105481710381636972081367249682250563865354757452914643736478981371749406
+USER Thread Algorithm 2: Impossible to get a valid collection of primes
