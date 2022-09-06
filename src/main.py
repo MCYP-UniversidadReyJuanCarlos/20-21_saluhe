@@ -283,7 +283,9 @@ try:
 
     outputFile = open (outputFilePath,'a')
     output_connection = Fill_OutputFile(outputFile)
+    print('RSA Public-Key generation with verifiable randomness')
     outputFile.write('RSA Public-Key generation with verifiable randomness' + '\n')
+    print('Output file  '+outputFilePath+' will be generated on this folder' + '\n')
     outputFile.write('User and CA threads have been created' + '\n')
 
     user_t = threading.Thread(name='USER Thread' , target = user)

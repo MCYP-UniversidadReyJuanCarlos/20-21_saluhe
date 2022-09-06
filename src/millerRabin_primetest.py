@@ -7,7 +7,8 @@ from pkcs1.defaults import default_pseudo_random, default_crypto_random
 #   k fixed number of iterations http://stackoverflow.com/questions/6325576/how-many-iterations-of-rabin-miller-should-i-use-for-cryptographic-safe-primes
 def millerRabin_2(n:int, a:int) -> bool :
     if a > n-2 or a < 2:
-        print('random a must be between 2 and n-2')
+        print('MILLER RABIN: random a must be between 2 and n-2. FALSE')
+        return False
 
     d = n - 1
     s = 0
