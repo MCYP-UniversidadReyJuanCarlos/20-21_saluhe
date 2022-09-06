@@ -218,7 +218,7 @@ Devuelve una coleccion de numeros pseudo-aleatorios a y el entero i. Este entero
 
 Para la creacion del fichero exe con todas las dependencias:
 * (Si no se dispone del modulo pyinstaller, es necesario ejecutar lo siguiente: - **pyinstaller**     py -m pip install PyInstaller)
-* **python -O -m PyInstaller -F <ruta-del-proyecto>\src\main.py -n <nombre-del-ejecutable-final>**
+* **python -O -m PyInstaller -F "\<ruta-del-proyecto\>"\src\main.py -n "\<nombre-del-ejecutable-final\>"**
 * La opcion -F del comando se usa para la encapsulacion de las dependencias en un solo fichero ejecutable.
 
 ### Bibliografía
