@@ -1,5 +1,6 @@
 #Public key generator with verifiable randomnes
 import copy
+from multiprocessing.connection import wait
 import os
 import threading
 from time import gmtime, strftime
@@ -166,12 +167,18 @@ def user():
     if(pipe.pop()):
         lock_InformationPipe.release()
 
-        return (publicKeyRSA(p*q ,e), privateKeyRSA(p, q, e))
+        #Print user output to file
+        N = p*q
+        output_connection.writeOutputFile('Output User ((N,e),(p,q,e)): ('+str(N)+','+str(e)+'),('+str(p)+','+str(q)+','+str(e)+'))')
+        output_connection.writeOutputFile('Output User: e '+str(proof_w.firstTuple.getComponentByName("publicExponent")))
+        return (publicKeyRSA(N ,e), privateKeyRSA(p, q, e))
 
     lock_InformationPipe.release()    
     output_connection.raise_exception(Exception("golberg Proof: Not valid"))    
 
 def ca():    
+    #Allow the user be the first to execute
+    time.sleep(2)
     lock_InformationPipe.acquire()
     c = pipe.pop()
     output_connection.writeOutputFile('Commitment received from user: ' + str(c))
@@ -199,6 +206,8 @@ def ca():
         output_connection.writeOutputFile('OK sent to user --------->')
         lock_InformationPipe.release()
 
+        output_connection.writeOutputFile('Output CA: N '+str(proof_w.firstTuple.getComponentByName("modulus")))
+        output_connection.writeOutputFile('Output CA: e '+str(proof_w.firstTuple.getComponentByName("publicExponent")))
         return proof_w.firstTuple
 
     output_connection.writeOutputFile('golberg Proof: Not valid. Error sent to user --------->')
@@ -226,9 +235,12 @@ def test_golberg():
     salt = univ.OctetString(aux) #Nist recommend salt string of at least 32 bit
     
     alpha = number.getPrime(8, Random.new().read) #alpha small prime α (about 16 bits long or less)
+    
+    output_connection.writeOutputFile('Ready to execute NIZK Goldberg...') 
+    
     golberg = golberg_et_al(salt, alpha, k, e, N.bit_length())
     proof_w = golberg.prove(p,q)
-        
+      
     pipe.append(golberg)
     pipe.append(proof_w)
 

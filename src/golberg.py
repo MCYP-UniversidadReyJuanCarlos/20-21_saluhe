@@ -16,7 +16,6 @@ from Crypto.Util import number
 class golberg_output:
     firstTuple:AsnPubKey
     secondTuple=[]
-    pi_collection=[]
 
 class golberg_key:
     p:int
@@ -77,7 +76,6 @@ class golberg_et_al:
 
             for i in range(1, m2+1):
                 p_i = self.getRho(asnKRSA, self.salt, i, self.len, m2)
-                result.pi_collection.append(p_i)
                 if p_i not in range(0, N-1):
                     raise ValueError("Golberg: Message representative out of range")
                 if i <= m1:                
