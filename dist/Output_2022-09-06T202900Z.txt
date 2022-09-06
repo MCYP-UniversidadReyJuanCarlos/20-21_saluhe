@@ -1,0 +1,8 @@
+RSA Public-Key generation with verifiable randomness
+User and CA threads have been created
+USER Thread r_u has been established: 323032322d30392d30365432303a32393a30305a6567376c7038
+USER Thread p_u has been established: efb8c7e8f7742533b076b133da5ebc82c2ad420e3d7789b323f4916d75011e3e
+USER Thread Seed s_prima has been established: 654c071c9b5f2f0df7591a87a093c41eb24c5aa127fbf3aee28b772676682301
+USER Thread Commitment has been computed by pedersens scheme: 13801379637847557925120550139956021558832813459430112801333985309405430098548801
+USER Thread Commitment sent to CA --------->
+USER Thread 
